@@ -1,5 +1,5 @@
 // chat.js
-// Backend do agente "Especialista em Economia do Japão" — versão Google Gemini (GRATUITA)
+// Backend do agente "Especialista em Economia do Japão" — versão Groq (GRATUITA, sem cartão)
 
 const SYSTEM_PROMPT = `
 Você é um agente especialista EXCLUSIVAMENTE em economia do Japão.
@@ -19,7 +19,7 @@ Regras:
 - Responda no idioma em que o usuário perguntar.
 `;
 
-const MODEL = "gemini-flash-latest";
+const MODEL = "llama-3.3-70b-versatile";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -41,36 +41,37 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Campo 'message' é obrigatório." });
     }
 
-    // Converte o histórico do formato {role, content} para o formato do Gemini
-    const contents = [
+    // Formato de mensagens no padrão OpenAI (Groq é compatível)
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
       ...history.map((h) => ({
-        role: h.role === "assistant" ? "model" : "user",
-        parts: [{ text: h.content }],
+        role: h.role === "assistant" ? "assistant" : "user",
+        content: h.content,
       })),
-      { role: "user", parts: [{ text: message }] },
+      { role: "user", content: message },
     ];
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-
-    const response = await fetch(url, {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
       body: JSON.stringify({
-        contents,
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        model: MODEL,
+        messages,
+        max_tokens: 1200,
       }),
     });
 
     const data = await response.json();
 
     if (data.error) {
-      console.error("Erro da API Gemini:", data.error);
+      console.error("Erro da API Groq:", data.error);
       return res.status(500).json({ error: "Erro ao consultar o agente." });
     }
 
-    const reply =
-      data.candidates?.[0]?.content?.parts?.map((p) => p.text).join("\n") ||
-      "Não consegui gerar uma resposta. Tente reformular a pergunta.";
+    const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta.";
 
     return res.status(200).json({ reply });
   } catch (err) {
