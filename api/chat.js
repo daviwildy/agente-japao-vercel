@@ -1,9 +1,5 @@
 // api/chat.js
-// VERSÃO INTEGRAL: Edge Web API com injeção forçada de CORS para o Wix e Arquivos Locais
-
-export const config = {
-  runtime: 'edge', // Obriga a Vercel a usar o motor moderno livre de travas
-};
+// Versão Definitiva: Node.js clássico com CORS gerenciado por rotas estruturadas
 
 const MODEL = "llama-3.3-70b-versatile"; 
 
@@ -28,38 +24,30 @@ async function buscarDadosWeb(query) {
     if (data.organic && data.organic.length > 0) {
       return data.organic.slice(0, 3).map(item => `- ${item.title}: ${item.snippet}`).join("\n");
     }
-    return "Nenhum dado recente de 2026 encontrado.";
+    return "Nenhum dado recente de 2026 encontrado na busca.";
   } catch (error) {
     return "Falha ao realizar busca em tempo real.";
   }
 }
 
-export default async function handler(req) {
-  // CONFIGURAÇÃO DOS CABEÇALHOS DO CORS NO PADRÃO WEB API
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*", // Libera o Wix e o seu arquivo local teste.html
-    "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-    "Content-Type": "application/json"
-  };
-
-  // 1. RESPONDE IMEDIATAMENTE AO TESTE DE PRÉ-CONEXÃO (OPTIONS) DO CHROME
+export default async function handler(req, res) {
+  // Responde imediatamente ao teste de segurança do navegador gerenciado pelas rotas
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return res.status(200).end();
   }
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Método não permitido." }), { status: 405, headers: corsHeaders });
+    return res.status(405).json({ error: "Método não permitido, use POST." });
   }
 
   try {
-    const { message, history = [] } = await req.json();
+    const { message, history = [] } = req.body;
 
-    if (!message) {
-      return new Response(JSON.stringify({ error: "Mensagem obrigatória." }), { status: 400, headers: corsHeaders });
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "Campo 'message' é obrigatório." });
     }
 
-    const dadosInternet = await buscarDadosWeb(message);
+    const dadosAtuaisDaInternet = await buscarDadosWeb(message);
 
     const messages = [
       { role: "system", content: gerarSystemPrompt() },
@@ -67,7 +55,7 @@ export default async function handler(req) {
         role: h.role === "assistant" ? "assistant" : "user",
         content: h.content,
       })),
-      { role: "user", content: `Contexto atualizado da internet (Ano 2026):\n${dadosInternet}\n\nPergunta: ${message}` },
+      { role: "user", content: `Contexto atualizado da internet (Ano 2026):\n${dadosAtuaisDaInternet}\n\nPergunta do usuário: ${message}` },
     ];
 
     const response = await fetch("https://groq.com", {
@@ -82,14 +70,15 @@ export default async function handler(req) {
     const data = await response.json();
 
     if (data.error) {
-      return new Response(JSON.stringify({ error: data.error.message }), { status: 500, headers: corsHeaders });
+      return res.status(500).json({ error: `Erro na API Groq: ${data.error.message}` });
     }
 
     const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta.";
-    return new Response(JSON.stringify({ reply }), { status: 200, headers: corsHeaders });
+    return res.status(200).json({ reply });
     
   } catch (err) {
-    return new Response(JSON.stringify({ error: "Erro interno no servidor." }), { status: 500, headers: corsHeaders });
+    console.error(err);
+    return res.status(500).json({ error: "Erro interno no servidor." });
   }
 }
 
