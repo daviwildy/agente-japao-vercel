@@ -2,7 +2,7 @@
 // Versão Definitiva: Edge Runtime com CORS liberado para o Wix
 
 export const config = {
-  runtime: 'edge', // Garante execução ultrarrápida e sem timeout
+  runtime: 'edge', // Garante execução ultrarrápida e sem timeout na Vercel
 };
 
 const MODEL = "llama-3.3-70b-versatile"; 
@@ -34,7 +34,7 @@ async function buscarDadosWeb(query) {
 }
 
 export default async function handler(req) {
-  // Configuração obrigatória de Headers para o Wix conseguir conectar
+  // Configuração obrigatória de Headers para liberar o acesso do Wix (CORS)
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -42,7 +42,7 @@ export default async function handler(req) {
     "Content-Type": "application/json",
   };
 
-  // Trata requisições de teste enviadas pelos navegadores (CORS)
+  // Trata requisições de teste enviadas pelos navegadores (OPTIONS)
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers });
   }
@@ -66,7 +66,7 @@ export default async function handler(req) {
         role: h.role === "assistant" ? "assistant" : "user",
         content: h.content,
       })),
-      { role: "user", content: `Contexto updated da internet:\n${dadosAtuaisDaInternet}\n\nPergunta: ${message}` },
+      { role: "user", content: `Contexto atualizado da internet:\n${dadosAtuaisDaInternet}\n\nPergunta: ${message}` },
     ];
 
     const response = await fetch("https://groq.com", {
@@ -84,8 +84,7 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: data.error.message }), { status: 500, headers });
     }
 
-    // LINHA CORRIGIDA SEM ERROS DE DIGITAÇÃO:
-    const reply = data.choices?.[0]?.message?.content || "Sem resposta.";
+    const reply = data.choices?.message?.content || "Sem resposta.";
     return new Response(JSON.stringify({ reply }), { status: 200, headers });
 
   } catch (err) {
