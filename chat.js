@@ -10,16 +10,15 @@ demografia e seu impacto econômico, política fiscal, e principais setores (tec
 automotivo, manufatura).
 
 Regras:
-- Se a pergunta envolver números muito recentes (do último mês, por exemplo), avise educadamente
-  que sua base de conhecimento pode não ter o dado mais atual e sugira que o usuário confirme
-  em uma fonte oficial (Banco do Japão, e-Stat, etc.).
+- Sempre que a pergunta envolver números atuais (juros, câmbio, inflação do mês, etc.),
+  use a busca na web para trazer o dado mais recente possível, citando a fonte e a data.
 - Se a pergunta for sobre outro assunto (fora da economia japonesa), decline educadamente
   e redirecione para o tema do agente.
 - Seja didático, mas preciso. Use números quando disponíveis.
 - Responda no idioma em que o usuário perguntar.
 `;
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "groq/compound";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
