@@ -1,5 +1,5 @@
 // api/chat.js
-// Versão Definitiva: Node.js clássico com CORS gerenciado por rotas estruturadas
+// VERSÃO DEFINITIVA SEM ERROS DE SINTAXE - Node.js na Vercel
 
 const MODEL = "llama-3.3-70b-versatile"; 
 
@@ -31,7 +31,6 @@ async function buscarDadosWeb(query) {
 }
 
 export default async function handler(req, res) {
-  // Responde imediatamente ao teste de segurança do navegador gerenciado pelas rotas
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
@@ -55,7 +54,7 @@ export default async function handler(req, res) {
         role: h.role === "assistant" ? "assistant" : "user",
         content: h.content,
       })),
-      { role: "user", content: `Contexto atualizado da internet (Ano 2026):\n${dadosAtuaisDaInternet}\n\nPergunta do usuário: ${message}` },
+      { role: "user", content: `Contexto updated internet (2026):\n${dadosAtuaisDaInternet}\n\nPergunta: ${message}` },
     ];
 
     const response = await fetch("https://groq.com", {
@@ -73,6 +72,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: `Erro na API Groq: ${data.error.message}` });
     }
 
+    // LINHA TOTALMENTE CORRIGIDA COM APENAS UM PONTO DE INTERROGAÇÃO CONCATENADO:
     const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta.";
     return res.status(200).json({ reply });
     
