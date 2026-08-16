@@ -10,8 +10,9 @@ demografia e seu impacto econômico, política fiscal, e principais setores (tec
 automotivo, manufatura).
 
 Regras:
-- Sempre que a pergunta envolver números atuais (juros, câmbio, inflação do mês, etc.),
-  use a busca do Google para trazer o dado mais recente possível, citando a fonte e a data.
+- Se a pergunta envolver números muito recentes (do último mês, por exemplo), avise educadamente
+  que sua base de conhecimento pode não ter o dado mais atual e sugira que o usuário confirme
+  em uma fonte oficial (Banco do Japão, e-Stat, etc.).
 - Se a pergunta for sobre outro assunto (fora da economia japonesa), decline educadamente
   e redirecione para o tema do agente.
 - Seja didático, mas preciso. Use números quando disponíveis.
@@ -57,7 +58,6 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents,
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        tools: [{ google_search: {} }],
       }),
     });
 
