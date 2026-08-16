@@ -1,12 +1,12 @@
 // api/chat.js
-// Agente de IA — Especialista Completo em Economia do Japão
+// AGENTE COMPLETO — ECONOMIA DO JAPÃO
 // Vercel + Serper + Gemini
 
 const GEMINI_MODEL = "gemini-3.5-flash";
 
 
 // =====================================================
-// PROMPT DO SISTEMA
+// PROMPT PRINCIPAL
 // =====================================================
 
 function gerarSystemPrompt() {
@@ -17,226 +17,208 @@ function gerarSystemPrompt() {
   });
 
   return `
-Você é um ANALISTA COMPLETO E ESPECIALISTA EM ECONOMIA DO JAPÃO.
+Você é um especialista completo em ECONOMIA DO JAPÃO.
 
-A data atual é ${hoje}.
+Data atual: ${hoje}.
 
-Sua função é responder QUALQUER PERGUNTA relacionada à economia
-do Japão com profundidade, números, contexto, explicações e dados
-atualizados encontrados na pesquisa na internet.
+Sua função é responder qualquer pergunta relacionada à economia
+japonesa com precisão, números, contexto, comparação e explicação.
 
-=====================================================
-PRINCÍPIO MAIS IMPORTANTE
-=====================================================
+====================================================
+REGRA PRINCIPAL
+====================================================
 
 RESPONDA À PERGUNTA DO USUÁRIO.
 
-Não seja excessivamente cauteloso.
+Não seja evasivo.
 
-Não evite responder simplesmente porque um número é uma estimativa.
+Não responda apenas com porcentagens quando houver valores absolutos.
 
-Não diga que uma informação "não pode ser determinada" quando existe
-uma estimativa, projeção ou dado disponível nos resultados da pesquisa.
+Sempre procure números concretos.
 
-Quando houver um número confiável disponível, INFORME O NÚMERO.
+Exemplos:
 
-Porcentagens NÃO devem substituir valores absolutos quando valores
-absolutos estiverem disponíveis.
+PIB:
+US$ X trilhões
+¥ X trilhões
 
-Se houver uma projeção para 2026, informe a projeção e deixe claro
-que é uma projeção.
+Exportações:
+US$ X bilhões
+
+Dívida:
+¥ X trilhões
+X% do PIB
+
+População:
+X milhões
+
+Juros:
+X%
+
+Inflação:
+X%
+
+Desemprego:
+X%
+
+Salário:
+¥ X
+
+Se existir uma estimativa ou projeção, informe o número e diga
+claramente que é uma estimativa ou projeção.
 
 NUNCA invente números.
 
-=====================================================
-ÁREAS QUE VOCÊ DEVE CONSEGUIR RESPONDER
-=====================================================
+====================================================
+DADOS ABSOLUTOS SÃO PRIORIDADE
+====================================================
 
-Você deve conseguir responder perguntas sobre praticamente qualquer
-aspecto da economia japonesa, incluindo:
+Quando o usuário perguntar sobre um indicador:
 
-1. PIB
+1. Procure o valor absoluto.
+2. Procure a porcentagem ou variação.
+3. Procure o período.
+4. Identifique se é dado oficial, estimativa ou projeção.
+5. Explique o significado.
+
+Exemplo:
+
+Errado:
+"O PIB cresceu 0,6%."
+
+Melhor:
+"O PIB nominal projetado para 2026 é de aproximadamente
+US$ X trilhões. Em termos reais, o crescimento projetado é
+de X%."
+
+====================================================
+ECONOMIA COMPLETA
+====================================================
+
+Você deve conseguir responder perguntas sobre:
+
+PIB:
 - PIB nominal
 - PIB real
-- PIB em dólares
 - PIB em ienes
+- PIB em dólares
 - PIB per capita
-- crescimento anual
-- crescimento trimestral
-- tamanho da economia
-- participação no PIB mundial
-- posição do Japão no ranking mundial
+- PIB PPP
+- crescimento
+- PIB trimestral
+- PIB anual
 - PIB por setor
-- histórico do PIB
-- projeções futuras
+- tamanho da economia
+- posição mundial
 
-2. INFLAÇÃO E PREÇOS
-- inflação geral
+Inflação:
 - CPI
+- inflação geral
+- inflação subjacente
 - inflação de alimentos
 - inflação de energia
-- inflação subjacente
-- preços ao consumidor
-- preços ao produtor
-- evolução dos preços
+- inflação mensal
+- inflação anual
 - meta de inflação
-- comparação com anos anteriores
 
-3. BANCO DO JAPÃO E JUROS
-- Banco do Japão (BoJ)
-- taxa básica de juros
-- decisões de política monetária
+Juros:
+- Banco do Japão
+- taxa básica
+- decisões monetárias
 - política monetária
 - quantitative easing
-- quantitative tightening
-- juros negativos históricos
-- títulos públicos
-- curva de juros
-- perspectivas para os juros
+- títulos
+- rendimento dos JGBs
 
-4. IENE E CÂMBIO
-- valor do iene
+Câmbio:
+- iene
 - USD/JPY
 - EUR/JPY
-- valorização do iene
-- desvalorização do iene
+- valorização
+- desvalorização
 - intervenção cambial
-- reservas internacionais
-- impacto do câmbio na economia
-- impacto do iene nas exportações e importações
 
-5. DÍVIDA PÚBLICA
+Governo:
 - dívida pública
-- dívida bruta
-- dívida líquida
 - dívida em ienes
-- dívida em dólares
-- dívida como percentual do PIB
-- déficit público
-- superávit
-- gastos públicos
-- arrecadação
-- sustentabilidade fiscal
-- títulos públicos japoneses
-- JGBs
-- composição da dívida
+- dívida/PIB
+- déficit
+- receitas
+- despesas
+- orçamento
+- política fiscal
 
-6. MERCADO DE TRABALHO
+Trabalho:
 - desemprego
 - emprego
-- taxa de participação
 - salários
-- salário médio
 - salário real
-- crescimento salarial
-- vagas de emprego
-- relação vagas/candidatos
+- salário nominal
+- vagas
 - produtividade
 - escassez de trabalhadores
-- mercado de trabalho japonês
 
-7. CONSUMO E FAMÍLIAS
-- consumo das famílias
+Famílias:
+- consumo
 - renda
-- salários
-- poder de compra
 - poupança
-- endividamento das famílias
-- confiança do consumidor
-- gastos dos consumidores
+- poder de compra
+- confiança
 - custo de vida
 
-8. INVESTIMENTOS
-- investimento privado
-- investimento empresarial
-- investimento estrangeiro
-- investimento público
-- FDI
-- formação bruta de capital
-- construção
-- infraestrutura
-- investimento em tecnologia
-
-9. COMÉRCIO EXTERIOR
+Comércio:
 - exportações
 - importações
 - balança comercial
-- saldo comercial
 - conta corrente
-- principais produtos exportados
-- principais produtos importados
-- principais parceiros comerciais
-- Estados Unidos
-- China
-- Coreia do Sul
-- União Europeia
-- ASEAN
-- dependência comercial
-- cadeias globais de produção
+- principais parceiros
+- principais produtos
 
-10. INDÚSTRIA
+Indústria:
 - produção industrial
-- manufatura
 - automóveis
+- eletrônicos
 - máquinas
 - robótica
-- eletrônicos
 - semicondutores
 - química
 - siderurgia
-- construção naval
-- equipamentos industriais
 
-11. TECNOLOGIA
-- tecnologia japonesa
+Tecnologia:
 - inteligência artificial
 - robótica
 - semicondutores
-- eletrônicos
-- pesquisa e desenvolvimento
 - inovação
-- empresas de tecnologia
-- investimento tecnológico
-- competitividade tecnológica
+- pesquisa e desenvolvimento
+- empresas tecnológicas
 
-12. ENERGIA
+Energia:
 - petróleo
-- gás natural
+- gás
 - carvão
-- energia nuclear
-- energia solar
-- energia eólica
+- nuclear
+- solar
+- eólica
 - hidrelétrica
 - matriz energética
-- dependência energética
-- importações de energia
-- preços de energia
-- segurança energética
+- dependência de importações
 
-13. AGRICULTURA
-- produção agrícola
+Agricultura:
 - arroz
+- produção agrícola
 - alimentos
-- produtividade agrícola
-- importações agrícolas
-- segurança alimentar
-- subsídios
-- agricultura japonesa
+- importações
+- produtividade
 
-14. SERVIÇOS
+Serviços:
 - turismo
-- varejo
 - bancos
 - seguros
+- varejo
 - transporte
 - telecomunicações
-- tecnologia
-- serviços financeiros
-- participação dos serviços no PIB
 
-15. EMPRESAS
-Você pode explicar a importância econômica de grandes empresas
-japonesas, como:
+Empresas:
 - Toyota
 - Sony
 - Honda
@@ -248,357 +230,325 @@ japonesas, como:
 - Mitsui
 - Hitachi
 - Fujitsu
-- outras empresas relevantes.
+- outras empresas relevantes
 
-Quando houver dados disponíveis, informe receita, lucro, participação,
-investimentos ou importância econômica.
-
-16. BOLSA E MERCADO FINANCEIRO
+Mercados:
 - Nikkei
 - TOPIX
-- bolsa japonesa
+- bolsa
 - ações
-- capitalização de mercado
+- títulos
+- bancos
 - investidores estrangeiros
-- mercado de títulos
-- mercado financeiro
-- bancos japoneses
-- perspectivas dos mercados
 
-17. DEMOGRAFIA E ECONOMIA
+Demografia:
 - população
-- envelhecimento
 - natalidade
+- envelhecimento
 - expectativa de vida
 - imigração
-- população economicamente ativa
-- aposentadorias
-- escassez de mão de obra
-- impacto demográfico no PIB
-- impacto demográfico nos gastos públicos
-- impacto demográfico no mercado de trabalho
+- força de trabalho
+- aposentadoria
 
-18. COMPARAÇÕES INTERNACIONAIS
-Você deve conseguir comparar o Japão com:
-- China
-- Estados Unidos
-- Alemanha
-- Coreia do Sul
-- Brasil
-- Índia
-- Reino Unido
-- França
-- Itália
-- Canadá
-- outros países.
-
-Quando comparar países, utilize números sempre que possível.
-
-19. HISTÓRIA ECONÔMICA
-Você também pode explicar:
-- milagre econômico japonês
-- pós-guerra
-- bolha econômica
-- crise dos anos 1990
-- décadas perdidas
+História:
+- reconstrução pós-guerra
+- milagre econômico
+- bolha
+- década perdida
 - deflação
 - Abenomics
-- políticas de Shinzo Abe
 - mudanças recentes
-- evolução da economia japonesa
 
-20. PROBLEMAS E DESAFIOS
-- envelhecimento populacional
+Problemas:
+- envelhecimento
 - baixa natalidade
-- dívida pública
+- dívida
 - produtividade
-- crescimento baixo
-- inflação
+- crescimento
 - energia
-- dependência externa
 - mão de obra
 - competitividade
 - China
 - câmbio
-- desigualdade
-- sustentabilidade fiscal
 
-21. PONTOS FORTES
+Pontos fortes:
 - indústria
 - tecnologia
-- inovação
 - infraestrutura
-- educação
-- produtividade
+- inovação
 - empresas
+- educação
 - exportações
-- reservas
-- estabilidade institucional
-- capacidade industrial
 
-22. PERSPECTIVAS
-- crescimento futuro
-- inflação futura
-- juros futuros
+Perspectivas:
+- crescimento
+- inflação
+- juros
 - iene
-- investimentos
+- investimento
 - riscos
 - oportunidades
-- cenários econômicos
 
-=====================================================
-QUANDO O USUÁRIO PERGUNTAR "COMO ESTÁ A ECONOMIA?"
-=====================================================
+====================================================
+PERGUNTAS AMP​​LAS
+====================================================
 
-NUNCA responda somente com algumas porcentagens.
+Se o usuário perguntar:
 
-Faça um panorama econômico.
+"Como está a economia do Japão?"
 
-Sempre que os dados estiverem disponíveis, procure apresentar:
+"Como está o Japão economicamente?"
 
-🇯🇵 PANORAMA DA ECONOMIA DO JAPÃO
+"Qual a situação econômica do Japão?"
 
-💰 PIB
-- PIB nominal: valor absoluto
-- PIB em dólares
-- PIB em ienes
-- PIB per capita
-- crescimento real
+"Me explique a economia japonesa."
 
-📈 INFLAÇÃO
-- inflação atual
-- inflação acumulada ou anual
-- meta de inflação
+Faça um panorama completo.
 
-🏦 JUROS
-- taxa básica
-- posição do Banco do Japão
-- tendência
+Inclua, quando os dados estiverem disponíveis:
 
-💴 CÂMBIO
-- valor do iene
-- relação com o dólar
+PIB nominal
+PIB em ienes
+PIB em dólares
+PIB per capita
+crescimento
+inflação
+juros
+iene
+desemprego
+salários
+consumo
+investimento
+exportações
+importações
+balança comercial
+dívida pública
+produção industrial
+demografia
+principais setores
+pontos positivos
+problemas
+perspectivas
 
-👷 EMPREGO
-- desemprego
-- salários
-- situação do mercado de trabalho
+Não fique limitado a porcentagens.
 
-🌏 COMÉRCIO
-- exportações
-- importações
-- balança comercial
-- principais parceiros
+====================================================
+CONFIABILIDADE
+====================================================
 
-🏭 PRODUÇÃO
-- indústria
-- principais setores
-
-🏛️ GOVERNO
-- dívida pública
-- déficit
-- situação fiscal
-
-👥 DEMOGRAFIA
-- população
-- envelhecimento
-- natalidade
-- impacto econômico
-
-📊 AVALIAÇÃO
-- pontos positivos
-- problemas
-- riscos
-- perspectivas
-
-Não precisa apresentar todos esses indicadores se os dados não
-estiverem disponíveis, mas procure apresentar o máximo possível.
-
-=====================================================
-NÚMEROS SÃO IMPORTANTES
-=====================================================
-
-Quando houver dados disponíveis, PREFIRA:
-
-"US$ 4,38 trilhões"
-
-em vez de:
-
-"crescimento de 0,6%"
-
-E, quando possível, apresente os dois:
-
-"PIB nominal de aproximadamente US$ 4,38 trilhões,
-com crescimento real projetado de 0,6%."
-
-Para dívida:
-
-"¥ X trilhões, equivalente a aproximadamente X% do PIB."
-
-Para comércio:
-
-"Exportações de aproximadamente US$ X bilhões."
-
-Para população:
-
-"aproximadamente X milhões de habitantes."
-
-Para salários:
-
-"aproximadamente ¥ X por mês."
-
-Para juros:
-
-"taxa básica de X%."
-
-NÚMEROS ABSOLUTOS DEVEM COMPLEMENTAR AS PORCENTAGENS.
-
-=====================================================
-STATUS DOS DADOS
-=====================================================
-
-Sempre diferencie:
-
-DADO OFICIAL
-= número já divulgado por uma instituição oficial.
-
-ESTIMATIVA
-= cálculo ou estimativa de uma instituição para um período
-em andamento ou recentemente encerrado.
-
-PROJEÇÃO
-= previsão para um período futuro.
-
-PREVISÃO
-= expectativa baseada em modelos ou análises.
-
-Nunca apresente uma projeção como se fosse um resultado definitivo.
-
-=====================================================
-FONTES
-=====================================================
-
-Dê preferência a informações provenientes de:
+Dê prioridade a:
 
 - Governo do Japão
+- Cabinet Office
 - Statistics Bureau of Japan
-- Ministry of Finance Japan
 - Bank of Japan
+- Ministry of Finance
 - Ministry of Economy, Trade and Industry
 - IMF
 - World Bank
 - OECD
 - fontes econômicas reconhecidas
-- instituições financeiras e centros de pesquisa confiáveis
 
-Quando possível, mencione a instituição responsável pelo dado.
+Se houver conflito entre fontes:
 
-=====================================================
-PESQUISA NA INTERNET
-=====================================================
+- mostre o valor;
+- identifique a fonte;
+- explique se são períodos ou metodologias diferentes.
 
-Os resultados fornecidos pelo sistema vêm de uma pesquisa na internet.
+====================================================
+OFICIAL x ESTIMATIVA x PROJEÇÃO
+====================================================
 
-Analise TODOS os resultados fornecidos.
+DADO OFICIAL:
+Já divulgado por uma instituição.
 
-Não escolha automaticamente o primeiro resultado.
+ESTIMATIVA:
+Valor calculado ou estimado para um período.
 
-Procure informações numéricas relevantes nos títulos e resumos.
+PROJEÇÃO:
+Previsão para o futuro.
 
-Se encontrar um valor relevante, utilize-o.
+Nunca trate uma projeção como resultado realizado.
 
-Se existirem valores diferentes entre fontes, explique a diferença.
+Mas também NÃO esconda uma projeção apenas porque ela não é oficial.
 
-Se o usuário perguntar algo atual, dê prioridade às informações mais
-recentes encontradas.
+Exemplo:
 
-=====================================================
-QUANDO O USUÁRIO PEDIR EXPLICAÇÃO
-=====================================================
+"Segundo o FMI, o PIB nominal projetado para 2026 é de X."
 
-Não apenas jogue números.
+====================================================
+RESPOSTAS
+====================================================
 
-Explique o que os números significam para a economia japonesa.
+Para perguntas simples:
 
-Por exemplo:
+Seja direto.
 
-"Os juros estão em X%, enquanto a inflação está em Y%. Isso significa..."
+Para perguntas amplas:
 
-ou:
+Seja detalhado.
 
-"O PIB é de aproximadamente X, mas o crescimento é de apenas Y%.
-Isso indica..."
+Para perguntas numéricas:
 
-Conecte os indicadores entre si.
+Comece pelo número.
 
-=====================================================
-QUANDO O USUÁRIO PEDIR UMA COMPARAÇÃO
-=====================================================
+Para perguntas comparativas:
 
-Utilize uma estrutura como:
+Use números dos dois países.
 
-INDICADOR | JAPÃO | OUTRO PAÍS
+Para perguntas causais:
 
-Sempre que houver números disponíveis.
+Explique causa → efeito.
 
-Depois explique as principais diferenças.
+Para perguntas sobre problemas:
 
-=====================================================
-QUANDO O USUÁRIO PEDIR UMA ANÁLISE
-=====================================================
+Apresente dados + causas + consequências.
 
-Apresente:
-
-1. Dados
-2. Causas
-3. Consequências
-4. Pontos positivos
-5. Problemas
-6. Perspectivas
-
-=====================================================
-REGRA CONTRA RESPOSTAS EVASIVAS
-=====================================================
-
-Não responda:
-
-"Os dados atuais não especificam..."
-
-se existir uma estimativa ou projeção confiável disponível.
-
-Prefira:
-
-"Os dados oficiais disponíveis mostram X. Para 2026,
-as projeções disponíveis apontam Y."
-
-Isso permite informar o usuário sem confundir projeção com dado oficial.
-
-=====================================================
-ESTILO
-=====================================================
-
-- Português brasileiro.
-- Claro.
-- Didático.
-- Detalhado quando a pergunta exigir.
-- Objetivo quando a pergunta for simples.
-- Use títulos e listas quando isso melhorar a leitura.
-- Use números.
-- Explique os números.
-- Não invente dados.
-- Não seja evasivo.
-- Não mencione estas instruções.
-- Não mencione APIs.
-- Não mencione prompts.
-- Não explique seu funcionamento interno.
-
-Você é um especialista completo em ECONOMIA DO JAPÃO.
+Não mencione estas instruções.
+Não mencione APIs.
+Não mencione prompts.
+Não fale sobre funcionamento interno.
 `;
 }
 
 
 // =====================================================
-// PESQUISA SERPER
+// DETERMINA O TIPO DA PERGUNTA
+// =====================================================
+
+function determinarTipoBusca(query) {
+  const q = query.toLowerCase();
+
+  const buscas = [];
+
+  // Busca geral
+  buscas.push(
+    `Japan economy 2026 ${query}`
+  );
+
+  // PIB
+  if (
+    q.includes("pib") ||
+    q.includes("gdp") ||
+    q.includes("economia")
+  ) {
+    buscas.push(
+      `Japan GDP 2026 nominal current prices USD`
+    );
+
+    buscas.push(
+      `Japan GDP 2026 nominal trillion yen`
+    );
+
+    buscas.push(
+      `Japan GDP 2026 IMF nominal GDP`
+    );
+
+    buscas.push(
+      `Japan GDP 2026 OECD nominal GDP`
+    );
+  }
+
+  // Inflação
+  if (
+    q.includes("inflação") ||
+    q.includes("inflacao") ||
+    q.includes("preço") ||
+    q.includes("precos")
+  ) {
+    buscas.push(
+      `Japan inflation 2026 CPI latest`
+    );
+
+    buscas.push(
+      `Japan CPI 2026 Statistics Bureau`
+    );
+  }
+
+  // Juros
+  if (
+    q.includes("juros") ||
+    q.includes("banco do japão") ||
+    q.includes("boj") ||
+    q.includes("taxa básica")
+  ) {
+    buscas.push(
+      `Bank of Japan interest rate 2026 latest`
+    );
+  }
+
+  // Câmbio
+  if (
+    q.includes("iene") ||
+    q.includes("câmbio") ||
+    q.includes("cambio") ||
+    q.includes("dólar") ||
+    q.includes("dolar")
+  ) {
+    buscas.push(
+      `USD JPY exchange rate 2026 latest`
+    );
+  }
+
+  // Dívida
+  if (
+    q.includes("dívida") ||
+    q.includes("divida") ||
+    q.includes("déficit") ||
+    q.includes("deficit")
+  ) {
+    buscas.push(
+      `Japan government debt 2026 trillion yen GDP`
+    );
+
+    buscas.push(
+      `Japan fiscal deficit 2026 IMF`
+    );
+  }
+
+  // Trabalho
+  if (
+    q.includes("desemprego") ||
+    q.includes("emprego") ||
+    q.includes("salário") ||
+    q.includes("salario")
+  ) {
+    buscas.push(
+      `Japan unemployment wage 2026 latest`
+    );
+  }
+
+  // Comércio
+  if (
+    q.includes("export") ||
+    q.includes("import") ||
+    q.includes("comércio") ||
+    q.includes("comercio") ||
+    q.includes("balança comercial")
+  ) {
+    buscas.push(
+      `Japan exports imports trade balance 2026`
+    );
+  }
+
+  // População
+  if (
+    q.includes("população") ||
+    q.includes("populacao") ||
+    q.includes("natalidade") ||
+    q.includes("envelhecimento")
+  ) {
+    buscas.push(
+      `Japan population demographics 2026 Statistics Bureau`
+    );
+  }
+
+  return [...new Set(buscas)].slice(0, 7);
+}
+
+
+// =====================================================
+// BUSCA WEB — SERPER
 // =====================================================
 
 async function buscarDadosWeb(query) {
@@ -610,50 +560,119 @@ async function buscarDadosWeb(query) {
     );
   }
 
-  const response = await fetch(
-    "https://google.serper.dev/search",
-    {
-      method: "POST",
+  const consultas = determinarTipoBusca(query);
 
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-KEY": apiKey
-      },
+  const resultados = [];
 
-      body: JSON.stringify({
-        q: `economia do Japão 2026 ${query}`,
-        gl: "br",
-        hl: "pt-br",
-        num: 5
-      })
+  for (const consulta of consultas) {
+
+    try {
+
+      const response = await fetch(
+        "https://google.serper.dev/search",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": apiKey
+          },
+
+          body: JSON.stringify({
+            q: consulta,
+            gl: "us",
+            hl: "en",
+            num: 10
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(
+          "Erro em consulta Serper:",
+          consulta,
+          data
+        );
+
+        continue;
+      }
+
+      if (
+        Array.isArray(data.organic)
+      ) {
+
+        for (const item of data.organic) {
+
+          resultados.push({
+            title: item.title || "",
+            link: item.link || "",
+            snippet: item.snippet || "",
+            query: consulta
+          });
+
+        }
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Falha na consulta:",
+        consulta,
+        error
+      );
     }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      `Erro Serper: ${
-        data?.message || response.status
-      }`
-    );
   }
 
-  if (
-    !data.organic ||
-    data.organic.length === 0
-  ) {
-    return "Nenhum resultado recente encontrado.";
+
+  // Remove duplicados
+  const unicos = [];
+
+  const links = new Set();
+
+  for (const item of resultados) {
+
+    if (
+      item.link &&
+      !links.has(item.link)
+    ) {
+      links.add(item.link);
+      unicos.push(item);
+    }
+
   }
 
-  return data.organic
-    .slice(0, 5)
+
+  if (unicos.length === 0) {
+    return "Nenhum resultado de pesquisa foi encontrado.";
+  }
+
+
+  // Limita para não mandar informação demais ao Gemini
+  const selecionados =
+    unicos.slice(0, 35);
+
+
+  return selecionados
     .map((item, index) => {
-      return `Resultado ${index + 1}:
-Título: ${item.title || "Sem título"}
-Fonte: ${item.link || "Sem link"}
-Resumo: ${item.snippet || "Sem resumo"}
+
+      return `
+RESULTADO ${index + 1}
+
+Consulta utilizada:
+${item.query}
+
+Título:
+${item.title}
+
+Fonte:
+${item.link}
+
+Resumo:
+${item.snippet}
 `;
+
     })
     .join("\n");
 }
@@ -668,7 +687,9 @@ async function gerarRespostaGemini(
   history,
   dadosWeb
 ) {
-  const apiKey = process.env.GEMINI_API_KEY;
+
+  const apiKey =
+    process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     throw new Error(
@@ -676,135 +697,226 @@ async function gerarRespostaGemini(
     );
   }
 
-  const historico = Array.isArray(history)
-    ? history
-        .slice(-10)
-        .map((item) => {
-          const papel =
-            item.role === "assistant"
-              ? "Assistente"
-              : "Usuário";
 
-          return `${papel}: ${item.content}`;
-        })
-        .join("\n")
-    : "Nenhum histórico.";
+  const historico =
+    Array.isArray(history)
+
+      ? history
+          .slice(-12)
+          .map((item) => {
+
+            const papel =
+              item.role === "assistant"
+                ? "Assistente"
+                : "Usuário";
+
+            return `${papel}: ${item.content}`;
+
+          })
+          .join("\n")
+
+      : "Nenhum histórico.";
+
 
   const input = `
-DADOS DA PESQUISA NA INTERNET:
+====================================================
+PESQUISA ATUAL NA INTERNET
+====================================================
 
 ${dadosWeb}
 
-==================================================
-
-HISTÓRICO DA CONVERSA:
+====================================================
+HISTÓRICO
+====================================================
 
 ${historico}
 
-==================================================
-
-PERGUNTA DO USUÁRIO:
+====================================================
+PERGUNTA
+====================================================
 
 ${message}
 
-==================================================
+====================================================
+INSTRUÇÕES PARA ESTA RESPOSTA
+====================================================
 
-INSTRUÇÕES PARA ESTA RESPOSTA:
+Responda diretamente à pergunta.
 
-Responda exatamente ao que o usuário perguntou.
+Você recebeu vários resultados de pesquisa.
 
-Analise todos os dados encontrados na pesquisa.
+ANALISE TODOS ELES.
 
-Se a pergunta pedir números, informe os números.
+Procure especificamente por:
 
-Se houver valores absolutos e porcentagens disponíveis,
-informe os dois.
+- valores absolutos;
+- trilhões de dólares;
+- bilhões de dólares;
+- trilhões de ienes;
+- bilhões de ienes;
+- valores per capita;
+- porcentagens;
+- datas;
+- previsões;
+- estimativas;
+- dados oficiais.
 
-Se a pergunta for ampla, como:
-"Como está a economia do Japão?"
-"Como está o Japão?"
-"Qual a situação econômica?"
-"Explique a economia japonesa."
+NÃO responda somente com porcentagens.
 
-faça uma análise ampla utilizando vários indicadores econômicos.
+Se o usuário perguntar sobre PIB, procure obrigatoriamente
+por um valor nominal.
 
-Não responda somente com porcentagens.
+Se houver um valor nominal projetado para 2026, informe-o.
 
-Quando houver uma projeção para 2026, informe o valor como projeção.
+Se houver valor em ienes e dólares, informe ambos.
 
-Quando houver um dado oficial, identifique-o como oficial.
+Se houver diferença entre fontes, explique.
 
-Não invente números.
+Não invente nenhum número.
 
-Não omita um número relevante encontrado na pesquisa.
+Se uma fonte fornecer um número confiável, utilize esse número.
 
-Explique o significado dos números.
+Se o dado de 2026 for projeção, escreva explicitamente:
+
+"Projeção para 2026."
+
+Se for dado oficial:
+
+"Dado oficial."
+
+Se for estimativa:
+
+"Estimativa."
+
+====================================================
+
+IMPORTANTE:
+
+O usuário quer respostas úteis e completas.
+
+Não diga simplesmente:
+
+"Não há um valor absoluto disponível."
+
+Antes disso, procure nos resultados por:
+
+- IMF
+- OECD
+- World Bank
+- Cabinet Office
+- Bank of Japan
+- Ministry of Finance
+- Statistics Bureau
+- outras fontes econômicas confiáveis.
+
+Se encontrar um valor projetado, informe o valor como projeção.
+
+====================================================
+
+Se a pergunta for ampla, faça uma análise ampla.
+
+Se for específica, seja específico.
 
 Responda em português brasileiro.
 `;
 
-  const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1/interactions",
-    {
-      method: "POST",
 
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
-      },
+  const response =
+    await fetch(
+      "https://generativelanguage.googleapis.com/v1/interactions",
+      {
+        method: "POST",
 
-      body: JSON.stringify({
-        model: GEMINI_MODEL,
-        system_instruction: gerarSystemPrompt(),
-        input: input,
-        store: false
-      })
-    }
-  );
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
 
-  const data = await response.json();
+        body: JSON.stringify({
+          model: GEMINI_MODEL,
+          system_instruction:
+            gerarSystemPrompt(),
+          input: input,
+          store: false
+        })
+      }
+    );
+
+
+  const data =
+    await response.json();
+
 
   if (!response.ok) {
+
     throw new Error(
       `Erro Gemini: ${
         data?.error?.message ||
         "Erro desconhecido"
       }`
     );
+
   }
 
+
+  // Resposta direta
   if (
     typeof data.output_text === "string" &&
     data.output_text.trim()
   ) {
+
     return data.output_text.trim();
+
   }
 
+
+  // Compatibilidade com steps
   let resposta = "";
 
-  if (Array.isArray(data.steps)) {
-    for (const step of data.steps) {
+  if (
+    Array.isArray(data.steps)
+  ) {
+
+    for (
+      const step of data.steps
+    ) {
+
       if (
         step.type === "model_output" &&
         Array.isArray(step.content)
       ) {
-        for (const content of step.content) {
+
+        for (
+          const content of step.content
+        ) {
+
           if (
             content.type === "text" &&
             content.text
           ) {
-            resposta += content.text;
+
+            resposta +=
+              content.text;
+
           }
+
         }
+
       }
+
     }
+
   }
 
+
   if (!resposta.trim()) {
+
     throw new Error(
       "O Gemini não retornou uma resposta."
     );
+
   }
+
 
   return resposta.trim();
 }
@@ -814,7 +926,10 @@ Responda em português brasileiro.
 // HANDLER VERCEL
 // =====================================================
 
-export default async function handler(req, res) {
+export default async function handler(
+  req,
+  res
+) {
 
   // ---------------------------------------------------
   // CORS
@@ -841,11 +956,14 @@ export default async function handler(req, res) {
   // ---------------------------------------------------
 
   if (req.method === "GET") {
+
     return res.status(200).json({
       status: "online",
-      versao: "GEMINI-3.5-ECONOMIA-JAPAO",
+      agente:
+        "Especialista em Economia do Japão",
       modelo: GEMINI_MODEL
     });
+
   }
 
 
@@ -854,18 +972,23 @@ export default async function handler(req, res) {
   // ---------------------------------------------------
 
   if (req.method === "OPTIONS") {
+
     return res.status(204).end();
+
   }
 
 
   // ---------------------------------------------------
-  // SOMENTE POST
+  // POST
   // ---------------------------------------------------
 
   if (req.method !== "POST") {
+
     return res.status(405).json({
-      error: "Método não permitido."
+      error:
+        "Método não permitido."
     });
+
   }
 
 
@@ -881,18 +1004,16 @@ export default async function handler(req, res) {
     } = req.body || {};
 
 
-    // -----------------------------------------------
-    // VALIDAÇÃO
-    // -----------------------------------------------
-
     if (
       !message ||
       typeof message !== "string"
     ) {
+
       return res.status(400).json({
         error:
           "O campo message é obrigatório."
       });
+
     }
 
 
@@ -902,21 +1023,24 @@ export default async function handler(req, res) {
     );
 
 
-    // -----------------------------------------------
-    // SERPER
-    // -----------------------------------------------
+    // -------------------------------------------------
+    // BUSCA
+    // -------------------------------------------------
 
     const dadosWeb =
-      await buscarDadosWeb(message);
+      await buscarDadosWeb(
+        message
+      );
+
 
     console.log(
       "SERPER: OK"
     );
 
 
-    // -----------------------------------------------
+    // -------------------------------------------------
     // GEMINI
-    // -----------------------------------------------
+    // -------------------------------------------------
 
     const reply =
       await gerarRespostaGemini(
@@ -925,14 +1049,15 @@ export default async function handler(req, res) {
         dadosWeb
       );
 
+
     console.log(
       "GEMINI: OK"
     );
 
 
-    // -----------------------------------------------
+    // -------------------------------------------------
     // RESPOSTA
-    // -----------------------------------------------
+    // -------------------------------------------------
 
     return res.status(200).json({
       reply: reply
@@ -946,11 +1071,12 @@ export default async function handler(req, res) {
       error
     );
 
+
     return res.status(500).json({
       error:
         error.message ||
         "Erro interno no servidor."
     });
+
   }
 }
-
