@@ -1,126 +1,95 @@
 // api/chat.js
-// Backend do agente "Especialista em Economia do Japão" — versão Groq + Serper Web Search
+// Versão Definitiva: Edge Runtime com CORS liberado para o Wix
+
+export const config = {
+  runtime: 'edge', // Garante execução ultrarrápida e sem timeout
+};
 
 const MODEL = "llama-3.3-70b-versatile"; 
 
 function gerarSystemPrompt() {
-  const hoje = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
-  return `
-Você é um agente especialista EXCLUSIVAMENTE em economia do Japão.
-A data de hoje é ${hoje}.
-
-Regras de Escopo:
-- Seu escopo cobre: PIB, inflação (CPI), taxa de juros e política do Banco do Japão (BOJ), câmbio do iene (USD/JPY), dívida pública, mercado de trabalho e demografia.
-- Se a pergunta for sobre outro assunto fora da economia japonesa, decline educadamente e não faça buscas.
-
-Regras de Resposta:
-- Use os dados atuais que foram fornecidos a você na busca web.
-- Seja didático, mas preciso. Use números e métricas sempre que disponíveis.
-- Cite de forma breve o ano ou a fonte dos dados encontrados na busca para passar credibilidade.
-- Responda sempre no idioma em que o usuário perguntar.
-`;
+  const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  return `Você é um agente especialista EXCLUSIVAMENTE em economia do Japão. A data de hoje é ${hoje}.
+  Use os dados atuais fornecidos na busca web. Seja didático e preciso. Responda no idioma do usuário.`;
 }
 
-// Função que conecta com o Serper.dev para buscar dados reais no Google
 async function buscarDadosWeb(query) {
   try {
     const response = await fetch("https://serper.dev", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-KEY": process.env.SERPER_API_KEY, // Puxa a chave que você salvou na Vercel
+        "X-API-KEY": process.env.SERPER_API_KEY,
       },
-      body: JSON.stringify({ 
-        q: `economia japao ${query}`, 
-        gl: "br", 
-        hl: "pt" 
-      }),
+      body: JSON.stringify({ q: `economia japao ${query}`, gl: "br", hl: "pt" }),
     });
-
     const data = await response.json();
-    
-    // Filtra e junta os resumos dos primeiros resultados do Google
     if (data.organic && data.organic.length > 0) {
       return data.organic.slice(0, 3).map(item => `- ${item.title}: ${item.snippet}`).join("\n");
     }
-    return "Nenhum dado recente encontrado na busca.";
+    return "Nenhum dado recente encontrado.";
   } catch (error) {
-    console.error("Erro ao buscar na web:", error);
-    return "Falha ao realizar busca em tempo real.";
+    return "Falha ao realizar busca.";
   }
 }
 
-export default async function handler(req, res) {
-  // Configuração de CORS para permitir requisições de qualquer Frontend externo
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+export default async function handler(req) {
+  // Configuração obrigatória de Headers para o Wix conseguir conectar
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json",
+  };
 
+  // Trata requisições de teste enviadas pelos navegadores (CORS)
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return new Response(null, { status: 200, headers });
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido, use POST." });
+    return new Response(JSON.stringify({ error: "Método não permitido." }), { status: 405, headers });
   }
 
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [] } = await req.json();
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Campo 'message' é obrigatório." });
+    if (!message) {
+      return new Response(JSON.stringify({ error: "Mensagem obrigatória." }), { status: 400, headers });
     }
 
-    // 1. O agente vai no Google buscar dados atuais sobre a pergunta do usuário
     const dadosAtuaisDaInternet = await buscarDadosWeb(message);
 
-    // 2. Monta o histórico de mensagens formatado para o Groq
     const messages = [
       { role: "system", content: gerarSystemPrompt() },
       ...history.map((h) => ({
         role: h.role === "assistant" ? "assistant" : "user",
         content: h.content,
       })),
-      // Alimenta o modelo injetando a pesquisa web junto com o texto do usuário
-      { 
-        role: "user", 
-        content: `Contexto atualizado da internet:\n${dadosAtuaisDaInternet}\n\nPergunta do usuário: ${message}` 
-      },
+      { role: "user", content: `Contexto updated da internet:\n${dadosAtuaisDaInternet}\n\nPergunta: ${message}` },
     ];
 
-    // 3. Faz a requisição oficial para a API do Groq
     const response = await fetch("https://groq.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        max_tokens: 1200,
-        temperature: 0.3, // Temperatura baixa deixa as respostas econômicas mais exatas
-      }),
+      body: JSON.stringify({ model: MODEL, messages, max_tokens: 1200, temperature: 0.3 }),
     });
 
     const data = await response.json();
 
     if (data.error) {
-      console.error("Erro da API Groq:", data.error);
-      return res.status(500).json({ error: `Erro na API Groq: ${data.error.message}` });
+      return new Response(JSON.stringify({ error: data.error.message }), { status: 500, headers });
     }
 
-    // Pega o texto gerado pela IA
-    const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta.";
+    // LINHA CORRIGIDA SEM ERROS DE DIGITAÇÃO:
+    const reply = data.choices?.[0]?.message?.content || "Sem resposta.";
+    return new Response(JSON.stringify({ reply }), { status: 200, headers });
 
-    return res.status(200).json({ reply });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return new Response(JSON.stringify({ error: "Erro interno." }), { status: 500, headers });
   }
 }
+
