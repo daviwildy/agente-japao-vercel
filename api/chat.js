@@ -359,14 +359,11 @@ Responda naturalmente em português brasileiro.
 // HANDLER DA VERCEL
 // =====================================================
 
-export default async function handler(
-  req,
-  res
-) {
+export default async function handler(req, res) {
 
-  // ---------------------------------------------------
+  // =====================================================
   // CORS
-  // ---------------------------------------------------
+  // =====================================================
 
   res.setHeader(
     "Access-Control-Allow-Origin",
@@ -375,7 +372,7 @@ export default async function handler(
 
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "POST, OPTIONS"
+    "GET, POST, OPTIONS"
   );
 
   res.setHeader(
@@ -384,42 +381,48 @@ export default async function handler(
   );
 
 
-  // ---------------------------------------------------
-  // PREFLIGHT
-  // ---------------------------------------------------
+  // =====================================================
+  // TESTE DE VERSÃO
+  // =====================================================
 
-  if (
-    req.method === "OPTIONS"
-  ) {
+  if (req.method === "GET") {
 
-    return res
-      .status(204)
-      .end();
-
-  }
-
-
-  // ---------------------------------------------------
-  // MÉTODO
-  // ---------------------------------------------------
-
-  if (
-    req.method !== "POST"
-  ) {
-
-    return res
-      .status(405)
-      .json({
-        error:
-          "Método não permitido. Use POST."
-      });
+    return res.status(200).json({
+      status: "online",
+      versao: "GEMINI-3.5-TESTE",
+      modelo: GEMINI_MODEL
+    });
 
   }
 
 
-  // ---------------------------------------------------
+  // =====================================================
+  // OPTIONS — CORS
+  // =====================================================
+
+  if (req.method === "OPTIONS") {
+
+    return res.status(204).end();
+
+  }
+
+
+  // =====================================================
+  // SOMENTE POST
+  // =====================================================
+
+  if (req.method !== "POST") {
+
+    return res.status(405).json({
+      error: "Método não permitido. Use POST."
+    });
+
+  }
+
+
+  // =====================================================
   // PROCESSAMENTO
-  // ---------------------------------------------------
+  // =====================================================
 
   try {
 
@@ -429,21 +432,18 @@ export default async function handler(
     } = req.body || {};
 
 
-    // -------------------------------------------------
+    // ---------------------------------------------------
     // VALIDAÇÃO
-    // -------------------------------------------------
+    // ---------------------------------------------------
 
     if (
       !message ||
       typeof message !== "string"
     ) {
 
-      return res
-        .status(400)
-        .json({
-          error:
-            "O campo 'message' é obrigatório."
-        });
+      return res.status(400).json({
+        error: "O campo 'message' é obrigatório."
+      });
 
     }
 
@@ -454,14 +454,12 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
-    // 1. PESQUISA SERPER
-    // -------------------------------------------------
+    // ---------------------------------------------------
+    // 1. PESQUISA NA SERPER
+    // ---------------------------------------------------
 
     const dadosWeb =
-      await buscarDadosWeb(
-        message
-      );
+      await buscarDadosWeb(message);
 
 
     console.log(
@@ -469,9 +467,9 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
-    // 2. GEMINI
-    // -------------------------------------------------
+    // ---------------------------------------------------
+    // 2. GERA RESPOSTA COM GEMINI
+    // ---------------------------------------------------
 
     const reply =
       await gerarRespostaGemini(
@@ -486,15 +484,13 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
-    // RESPOSTA PARA O WIX
-    // -------------------------------------------------
+    // ---------------------------------------------------
+    // RETORNA PARA O WIX
+    // ---------------------------------------------------
 
-    return res
-      .status(200)
-      .json({
-        reply
-      });
+    return res.status(200).json({
+      reply
+    });
 
 
   } catch (error) {
@@ -505,13 +501,14 @@ export default async function handler(
     );
 
 
-    return res
-      .status(500)
-      .json({
-        error:
-          error.message ||
-          "Erro interno no servidor."
-      });
+    return res.status(500).json({
+      error:
+        error.message ||
+        "Erro interno no servidor."
+    });
+
+  }
+
 
   }
 
