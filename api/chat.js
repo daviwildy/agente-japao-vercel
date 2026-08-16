@@ -1,23 +1,17 @@
 // api/chat.js
-// Versão Definitiva: Node.js na Vercel com CORS liberado e contextualizado para 2026
+// VERSÃO INTEGRAL: Edge Web API com injeção forçada de CORS para o Wix e Arquivos Locais
+
+export const config = {
+  runtime: 'edge', // Obriga a Vercel a usar o motor moderno livre de travas
+};
 
 const MODEL = "llama-3.3-70b-versatile"; 
 
 function gerarSystemPrompt() {
-  const hoje = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
+  const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
   return `Você é um agente especialista EXCLUSIVAMENTE em economia do Japão.
 A data atual de hoje é ${hoje} (Ano de 2026).
-
-Regras Importantes:
-- Use os dados atuais e recentes que foram fornecidos a você através da busca web em tempo real.
-- Suas análises, métricas, dados de PIB, inflação e taxas de juros devem refletir o cenário atualizado do ano de 2026.
-- Seja didático, mas preciso. Use números e métricas sempre que disponíveis.
-- Responda sempre no idioma em que o usuário perguntar.`;
+Use os dados atuais fornecidos na busca web. Seja didático e preciso. Responda no idioma do usuário.`;
 }
 
 async function buscarDadosWeb(query) {
@@ -28,47 +22,44 @@ async function buscarDadosWeb(query) {
         "Content-Type": "application/json",
         "X-API-KEY": process.env.SERPER_API_KEY, 
       },
-      body: JSON.stringify({ 
-        q: `economia japao 2026 ${query}`, 
-        gl: "br", 
-        hl: "pt" 
-      }),
+      body: JSON.stringify({ q: `economia japao 2026 ${query}`, gl: "br", hl: "pt" }),
     });
-
     const data = await response.json();
     if (data.organic && data.organic.length > 0) {
       return data.organic.slice(0, 3).map(item => `- ${item.title}: ${item.snippet}`).join("\n");
     }
-    return "Nenhum dado recente de 2026 encontrado na busca.";
+    return "Nenhum dado recente de 2026 encontrado.";
   } catch (error) {
     return "Falha ao realizar busca em tempo real.";
   }
 }
 
-export default async function handler(req, res) {
-  // 1. ADICIONA OS HEADERS DE LIBERAÇÃO DE CORS IMEDIATAMENTE
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Permite requisições do Wix, arquivo local, etc.
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
-  res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
+export default async function handler(req) {
+  // CONFIGURAÇÃO DOS CABEÇALHOS DO CORS NO PADRÃO WEB API
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*", // Libera o Wix e o seu arquivo local teste.html
+    "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+    "Content-Type": "application/json"
+  };
 
-  // 2. RESPONDE AO TESTE DE SEGURANÇA DO NAVEGADOR (PREFLIGHT)
+  // 1. RESPONDE IMEDIATAMENTE AO TESTE DE PRÉ-CONEXÃO (OPTIONS) DO CHROME
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido, use POST." });
+    return new Response(JSON.stringify({ error: "Método não permitido." }), { status: 405, headers: corsHeaders });
   }
 
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [] } = await req.json();
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Campo 'message' é obrigatório." });
+    if (!message) {
+      return new Response(JSON.stringify({ error: "Mensagem obrigatória." }), { status: 400, headers: corsHeaders });
     }
 
-    const dadosAtuaisDaInternet = await buscarDadosWeb(message);
+    const dadosInternet = await buscarDadosWeb(message);
 
     const messages = [
       { role: "system", content: gerarSystemPrompt() },
@@ -76,38 +67,29 @@ export default async function handler(req, res) {
         role: h.role === "assistant" ? "assistant" : "user",
         content: h.content,
       })),
-      { 
-        role: "user", 
-        content: `Contexto atualizado da internet (Ano 2026):\n${dadosAtuaisDaInternet}\n\nPergunta do usuário: ${message}` 
-      },
+      { role: "user", content: `Contexto atualizado da internet (Ano 2026):\n${dadosInternet}\n\nPergunta: ${message}` },
     ];
 
     const response = await fetch("https://groq.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        max_tokens: 1200,
-        temperature: 0.3, 
-      }),
+      body: JSON.stringify({ model: MODEL, messages, max_tokens: 1200, temperature: 0.3 }),
     });
 
     const data = await response.json();
 
     if (data.error) {
-      return res.status(500).json({ error: `Erro na API Groq: ${data.error.message}` });
+      return new Response(JSON.stringify({ error: data.error.message }), { status: 500, headers: corsHeaders });
     }
 
-    const reply = data.choices[0]?.message?.content || "Não consegui gerar uma resposta.";
-    return res.status(200).json({ reply });
+    const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta.";
+    return new Response(JSON.stringify({ reply }), { status: 200, headers: corsHeaders });
     
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return new Response(JSON.stringify({ error: "Erro interno no servidor." }), { status: 500, headers: corsHeaders });
   }
 }
 
