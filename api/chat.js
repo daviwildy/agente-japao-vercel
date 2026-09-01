@@ -1,12 +1,12 @@
 // api/chat.js
-// AGENTE COMPLETO — ECONOMIA DO JAPÃO
-// Vercel + Serper + Gemini
+// AGENTE DE IA — ECONOMIA DO JAPÃO
+// Vercel + Serper + Gemini + IMF DataMapper
 
 const GEMINI_MODEL = "gemini-3.5-flash";
 
 
 // =====================================================
-// PROMPT PRINCIPAL
+// PROMPT DO SISTEMA
 // =====================================================
 
 function gerarSystemPrompt() {
@@ -17,134 +17,121 @@ function gerarSystemPrompt() {
   });
 
   return `
-Você é um especialista completo em ECONOMIA DO JAPÃO.
+Você é um analista especialista em ECONOMIA DO JAPÃO.
 
 Data atual: ${hoje}.
 
 Sua função é responder qualquer pergunta relacionada à economia
-japonesa com precisão, números, contexto, comparação e explicação.
+japonesa utilizando dados atuais, números, contexto e análise.
 
 ====================================================
-REGRA PRINCIPAL
+REGRA ABSOLUTA
 ====================================================
 
-RESPONDA À PERGUNTA DO USUÁRIO.
+RESPONDA À PERGUNTA.
 
-Não seja evasivo.
+O usuário quer NÚMEROS.
 
-Não responda apenas com porcentagens quando houver valores absolutos.
+Não responda somente com porcentagens quando houver valores absolutos.
 
-Sempre procure números concretos.
+Sempre que possível informe:
 
-Exemplos:
-
-PIB:
-US$ X trilhões
-¥ X trilhões
-
-Exportações:
-US$ X bilhões
-
-Dívida:
-¥ X trilhões
-X% do PIB
-
-População:
-X milhões
-
-Juros:
-X%
-
-Inflação:
-X%
-
-Desemprego:
-X%
-
-Salário:
-¥ X
-
-Se existir uma estimativa ou projeção, informe o número e diga
-claramente que é uma estimativa ou projeção.
-
-NUNCA invente números.
-
-====================================================
-DADOS ABSOLUTOS SÃO PRIORIDADE
-====================================================
-
-Quando o usuário perguntar sobre um indicador:
-
-1. Procure o valor absoluto.
-2. Procure a porcentagem ou variação.
-3. Procure o período.
-4. Identifique se é dado oficial, estimativa ou projeção.
-5. Explique o significado.
+- valor absoluto;
+- porcentagem;
+- período;
+- moeda;
+- fonte;
+- status do dado.
 
 Exemplo:
 
-Errado:
-"O PIB cresceu 0,6%."
+PIB nominal:
+US$ X trilhões
 
-Melhor:
-"O PIB nominal projetado para 2026 é de aproximadamente
-US$ X trilhões. Em termos reais, o crescimento projetado é
-de X%."
+Crescimento:
+X%
+
+Período:
+2026
+
+Status:
+Projeção
+
+Fonte:
+FMI
 
 ====================================================
-ECONOMIA COMPLETA
+NÃO SEJA EVASIVO
 ====================================================
 
-Você deve conseguir responder perguntas sobre:
+Nunca diga:
+
+"Os resultados não apresentam o valor."
+
+antes de analisar os dados estruturados fornecidos pelo sistema.
+
+Se houver uma projeção confiável, INFORME A PROJEÇÃO.
+
+Não é necessário que o número seja um resultado anual definitivo
+para que ele seja informado.
+
+Diga:
+
+"Projeção para 2026"
+
+e informe o valor.
+
+Nunca invente números.
+
+====================================================
+ÁREAS DE CONHECIMENTO
+====================================================
+
+Você pode responder sobre toda a economia japonesa:
 
 PIB:
 - PIB nominal
 - PIB real
-- PIB em ienes
 - PIB em dólares
+- PIB em ienes
 - PIB per capita
 - PIB PPP
 - crescimento
 - PIB trimestral
 - PIB anual
 - PIB por setor
-- tamanho da economia
-- posição mundial
 
 Inflação:
 - CPI
-- inflação geral
+- inflação
 - inflação subjacente
-- inflação de alimentos
-- inflação de energia
-- inflação mensal
-- inflação anual
+- preços
+- alimentos
+- energia
 - meta de inflação
 
 Juros:
 - Banco do Japão
 - taxa básica
-- decisões monetárias
 - política monetária
-- quantitative easing
 - títulos
-- rendimento dos JGBs
+- JGB
+- quantitative easing
 
 Câmbio:
 - iene
-- USD/JPY
-- EUR/JPY
+- dólar/iene
+- euro/iene
 - valorização
 - desvalorização
 - intervenção cambial
 
 Governo:
 - dívida pública
-- dívida em ienes
 - dívida/PIB
 - déficit
+- gastos
 - receitas
-- despesas
 - orçamento
 - política fiscal
 
@@ -153,9 +140,8 @@ Trabalho:
 - emprego
 - salários
 - salário real
-- salário nominal
-- vagas
 - produtividade
+- vagas
 - escassez de trabalhadores
 
 Famílias:
@@ -163,7 +149,6 @@ Famílias:
 - renda
 - poupança
 - poder de compra
-- confiança
 - custo de vida
 
 Comércio:
@@ -171,8 +156,8 @@ Comércio:
 - importações
 - balança comercial
 - conta corrente
-- principais parceiros
-- principais produtos
+- parceiros comerciais
+- produtos
 
 Indústria:
 - produção industrial
@@ -185,12 +170,11 @@ Indústria:
 - siderurgia
 
 Tecnologia:
-- inteligência artificial
+- IA
 - robótica
 - semicondutores
 - inovação
-- pesquisa e desenvolvimento
-- empresas tecnológicas
+- P&D
 
 Energia:
 - petróleo
@@ -199,16 +183,13 @@ Energia:
 - nuclear
 - solar
 - eólica
-- hidrelétrica
 - matriz energética
-- dependência de importações
 
 Agricultura:
 - arroz
-- produção agrícola
 - alimentos
-- importações
 - produtividade
+- importações
 
 Serviços:
 - turismo
@@ -223,23 +204,21 @@ Empresas:
 - Sony
 - Honda
 - Nissan
-- Panasonic
 - Nintendo
+- Panasonic
 - SoftBank
 - Mitsubishi
 - Mitsui
 - Hitachi
 - Fujitsu
-- outras empresas relevantes
 
-Mercados:
+Mercado financeiro:
 - Nikkei
 - TOPIX
-- bolsa
 - ações
 - títulos
 - bancos
-- investidores estrangeiros
+- investidores
 
 Demografia:
 - população
@@ -248,16 +227,14 @@ Demografia:
 - expectativa de vida
 - imigração
 - força de trabalho
-- aposentadoria
 
 História:
-- reconstrução pós-guerra
+- pós-guerra
 - milagre econômico
 - bolha
-- década perdida
+- décadas perdidas
 - deflação
 - Abenomics
-- mudanças recentes
 
 Problemas:
 - envelhecimento
@@ -268,8 +245,6 @@ Problemas:
 - energia
 - mão de obra
 - competitividade
-- China
-- câmbio
 
 Pontos fortes:
 - indústria
@@ -278,151 +253,125 @@ Pontos fortes:
 - inovação
 - empresas
 - educação
-- exportações
 
 Perspectivas:
 - crescimento
 - inflação
 - juros
 - iene
-- investimento
+- investimentos
 - riscos
 - oportunidades
 
 ====================================================
-PERGUNTAS AMP​​LAS
+PERGUNTAS AMPLAS
 ====================================================
 
-Se o usuário perguntar:
+Quando o usuário perguntar:
 
 "Como está a economia do Japão?"
 
-"Como está o Japão economicamente?"
+ou algo equivalente, não responda apenas com crescimento e inflação.
 
-"Qual a situação econômica do Japão?"
+Monte um panorama com:
 
-"Me explique a economia japonesa."
+1. PIB
+2. crescimento
+3. PIB per capita
+4. inflação
+5. juros
+6. iene
+7. desemprego
+8. salários
+9. consumo
+10. investimento
+11. exportações
+12. importações
+13. balança comercial
+14. dívida pública
+15. indústria
+16. demografia
+17. pontos positivos
+18. problemas
+19. perspectivas
 
-Faça um panorama completo.
-
-Inclua, quando os dados estiverem disponíveis:
-
-PIB nominal
-PIB em ienes
-PIB em dólares
-PIB per capita
-crescimento
-inflação
-juros
-iene
-desemprego
-salários
-consumo
-investimento
-exportações
-importações
-balança comercial
-dívida pública
-produção industrial
-demografia
-principais setores
-pontos positivos
-problemas
-perspectivas
-
-Não fique limitado a porcentagens.
+Utilize números absolutos sempre que disponíveis.
 
 ====================================================
-CONFIABILIDADE
-====================================================
-
-Dê prioridade a:
-
-- Governo do Japão
-- Cabinet Office
-- Statistics Bureau of Japan
-- Bank of Japan
-- Ministry of Finance
-- Ministry of Economy, Trade and Industry
-- IMF
-- World Bank
-- OECD
-- fontes econômicas reconhecidas
-
-Se houver conflito entre fontes:
-
-- mostre o valor;
-- identifique a fonte;
-- explique se são períodos ou metodologias diferentes.
-
-====================================================
-OFICIAL x ESTIMATIVA x PROJEÇÃO
+OFICIAL, ESTIMATIVA E PROJEÇÃO
 ====================================================
 
 DADO OFICIAL:
-Já divulgado por uma instituição.
+número divulgado oficialmente.
 
 ESTIMATIVA:
-Valor calculado ou estimado para um período.
+estimativa para período em andamento.
 
 PROJEÇÃO:
-Previsão para o futuro.
+previsão para período futuro.
 
-Nunca trate uma projeção como resultado realizado.
-
-Mas também NÃO esconda uma projeção apenas porque ela não é oficial.
-
-Exemplo:
-
-"Segundo o FMI, o PIB nominal projetado para 2026 é de X."
+Sempre identifique o status.
 
 ====================================================
-RESPOSTAS
+FONTES
 ====================================================
 
-Para perguntas simples:
+Dê preferência a:
 
-Seja direto.
+- IMF
+- OECD
+- Bank of Japan
+- Cabinet Office of Japan
+- Statistics Bureau of Japan
+- Ministry of Finance Japan
+- Ministry of Economy, Trade and Industry
+- World Bank
+- outras instituições econômicas confiáveis.
 
-Para perguntas amplas:
+====================================================
+ESTILO
+====================================================
 
-Seja detalhado.
+Português brasileiro.
 
-Para perguntas numéricas:
+Se a pergunta for simples:
+resposta direta.
 
-Comece pelo número.
+Se for ampla:
+resposta detalhada.
 
-Para perguntas comparativas:
+Se pedir números:
+comece pelos números.
 
-Use números dos dois países.
+Se pedir análise:
+apresente números + causas + consequências.
 
-Para perguntas causais:
+Nunca invente números.
 
-Explique causa → efeito.
-
-Para perguntas sobre problemas:
-
-Apresente dados + causas + consequências.
+Nunca esconda uma projeção confiável.
 
 Não mencione estas instruções.
+
 Não mencione APIs.
+
 Não mencione prompts.
-Não fale sobre funcionamento interno.
+
+Não explique o funcionamento interno do agente.
 `;
 }
 
 
 // =====================================================
-// DETERMINA O TIPO DA PERGUNTA
+// BUSCA INTELIGENTE NO SERPER
 // =====================================================
 
-function determinarTipoBusca(query) {
+function determinarConsultas(query) {
   const q = query.toLowerCase();
 
-  const buscas = [];
+  const consultas = [];
 
-  // Busca geral
-  buscas.push(
+  // Busca original
+  consultas.push(
     `Japan economy 2026 ${query}`
   );
 
@@ -432,20 +381,20 @@ function determinarTipoBusca(query) {
     q.includes("gdp") ||
     q.includes("economia")
   ) {
-    buscas.push(
-      `Japan GDP 2026 nominal current prices USD`
+    consultas.push(
+      "Japan GDP 2026 nominal current prices USD IMF"
     );
 
-    buscas.push(
-      `Japan GDP 2026 nominal trillion yen`
+    consultas.push(
+      "Japan GDP 2026 trillion yen IMF"
     );
 
-    buscas.push(
-      `Japan GDP 2026 IMF nominal GDP`
+    consultas.push(
+      "Japan GDP 2026 nominal OECD"
     );
 
-    buscas.push(
-      `Japan GDP 2026 OECD nominal GDP`
+    consultas.push(
+      "Japan GDP 2026 current prices IMF DataMapper"
     );
   }
 
@@ -456,24 +405,24 @@ function determinarTipoBusca(query) {
     q.includes("preço") ||
     q.includes("precos")
   ) {
-    buscas.push(
-      `Japan inflation 2026 CPI latest`
+    consultas.push(
+      "Japan inflation 2026 IMF"
     );
 
-    buscas.push(
-      `Japan CPI 2026 Statistics Bureau`
+    consultas.push(
+      "Japan CPI 2026 Statistics Bureau"
     );
   }
 
   // Juros
   if (
     q.includes("juros") ||
+    q.includes("taxa") ||
     q.includes("banco do japão") ||
-    q.includes("boj") ||
-    q.includes("taxa básica")
+    q.includes("boj")
   ) {
-    buscas.push(
-      `Bank of Japan interest rate 2026 latest`
+    consultas.push(
+      "Bank of Japan policy rate 2026"
     );
   }
 
@@ -485,8 +434,8 @@ function determinarTipoBusca(query) {
     q.includes("dólar") ||
     q.includes("dolar")
   ) {
-    buscas.push(
-      `USD JPY exchange rate 2026 latest`
+    consultas.push(
+      "USD JPY exchange rate 2026"
     );
   }
 
@@ -497,12 +446,12 @@ function determinarTipoBusca(query) {
     q.includes("déficit") ||
     q.includes("deficit")
   ) {
-    buscas.push(
-      `Japan government debt 2026 trillion yen GDP`
+    consultas.push(
+      "Japan government debt 2026 IMF"
     );
 
-    buscas.push(
-      `Japan fiscal deficit 2026 IMF`
+    consultas.push(
+      "Japan government debt trillion yen 2026"
     );
   }
 
@@ -513,8 +462,12 @@ function determinarTipoBusca(query) {
     q.includes("salário") ||
     q.includes("salario")
   ) {
-    buscas.push(
-      `Japan unemployment wage 2026 latest`
+    consultas.push(
+      "Japan unemployment 2026 Statistics Bureau"
+    );
+
+    consultas.push(
+      "Japan wages 2026 latest"
     );
   }
 
@@ -523,11 +476,10 @@ function determinarTipoBusca(query) {
     q.includes("export") ||
     q.includes("import") ||
     q.includes("comércio") ||
-    q.includes("comercio") ||
-    q.includes("balança comercial")
+    q.includes("comercio")
   ) {
-    buscas.push(
-      `Japan exports imports trade balance 2026`
+    consultas.push(
+      "Japan exports imports 2026 Ministry Finance"
     );
   }
 
@@ -538,17 +490,17 @@ function determinarTipoBusca(query) {
     q.includes("natalidade") ||
     q.includes("envelhecimento")
   ) {
-    buscas.push(
-      `Japan population demographics 2026 Statistics Bureau`
+    consultas.push(
+      "Japan population 2026 Statistics Bureau"
     );
   }
 
-  return [...new Set(buscas)].slice(0, 7);
+  return [...new Set(consultas)].slice(0, 8);
 }
 
 
 // =====================================================
-// BUSCA WEB — SERPER
+// SERPER
 // =====================================================
 
 async function buscarDadosWeb(query) {
@@ -560,14 +512,13 @@ async function buscarDadosWeb(query) {
     );
   }
 
-  const consultas = determinarTipoBusca(query);
+  const consultas =
+    determinarConsultas(query);
 
   const resultados = [];
 
   for (const consulta of consultas) {
-
     try {
-
       const response = await fetch(
         "https://google.serper.dev/search",
         {
@@ -589,50 +540,32 @@ async function buscarDadosWeb(query) {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        console.error(
-          "Erro em consulta Serper:",
-          consulta,
-          data
-        );
-
-        continue;
-      }
-
       if (
         Array.isArray(data.organic)
       ) {
-
         for (const item of data.organic) {
-
           resultados.push({
             title: item.title || "",
             link: item.link || "",
             snippet: item.snippet || "",
-            query: consulta
+            consulta
           });
-
         }
       }
 
     } catch (error) {
-
       console.error(
-        "Falha na consulta:",
+        "Erro Serper:",
         consulta,
         error
       );
     }
   }
 
-
-  // Remove duplicados
   const unicos = [];
-
   const links = new Set();
 
   for (const item of resultados) {
-
     if (
       item.link &&
       !links.has(item.link)
@@ -640,28 +573,19 @@ async function buscarDadosWeb(query) {
       links.add(item.link);
       unicos.push(item);
     }
-
   }
-
 
   if (unicos.length === 0) {
-    return "Nenhum resultado de pesquisa foi encontrado.";
+    return "Nenhum resultado encontrado.";
   }
 
-
-  // Limita para não mandar informação demais ao Gemini
-  const selecionados =
-    unicos.slice(0, 35);
-
-
-  return selecionados
-    .map((item, index) => {
-
-      return `
+  return unicos
+    .slice(0, 40)
+    .map((item, index) => `
 RESULTADO ${index + 1}
 
-Consulta utilizada:
-${item.query}
+Consulta:
+${item.consulta}
 
 Título:
 ${item.title}
@@ -671,6 +595,92 @@ ${item.link}
 
 Resumo:
 ${item.snippet}
+`)
+    .join("\n");
+}
+
+
+// =====================================================
+// IMF DATAMAPPER
+// =====================================================
+
+async function buscarDadosIMF() {
+
+  const indicadores = [
+    "NGDPD",
+    "NGDPDPC",
+    "NGDP_RPCH",
+    "PCPIPCH",
+    "LUR",
+    "GGXWDG_NGDP"
+  ];
+
+  const resultados = [];
+
+  for (const indicador of indicadores) {
+
+    try {
+
+      const url =
+        `https://www.imf.org/external/datamapper/api/v1/${indicador}/JPN`;
+
+      const response =
+        await fetch(url);
+
+      if (!response.ok) {
+        console.error(
+          "IMF erro:",
+          indicador,
+          response.status
+        );
+        continue;
+      }
+
+      const data =
+        await response.json();
+
+      if (
+        data &&
+        data.values &&
+        data.values[indicador] &&
+        data.values[indicador].JPN
+      ) {
+
+        resultados.push({
+          indicador,
+          valores:
+            data.values[indicador].JPN
+        });
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Erro IMF:",
+        indicador,
+        error
+      );
+
+    }
+  }
+
+  if (resultados.length === 0) {
+    return "Não foi possível obter dados estruturados do FMI.";
+  }
+
+  return resultados
+    .map((item) => {
+
+      return `
+INDICADOR IMF: ${item.indicador}
+
+JAPÃO:
+${JSON.stringify(
+  item.valores,
+  null,
+  2
+)}
 `;
 
     })
@@ -685,7 +695,8 @@ ${item.snippet}
 async function gerarRespostaGemini(
   message,
   history,
-  dadosWeb
+  dadosWeb,
+  dadosIMF
 ) {
 
   const apiKey =
@@ -697,10 +708,8 @@ async function gerarRespostaGemini(
     );
   }
 
-
   const historico =
     Array.isArray(history)
-
       ? history
           .slice(-12)
           .map((item) => {
@@ -714,13 +723,17 @@ async function gerarRespostaGemini(
 
           })
           .join("\n")
-
       : "Nenhum histórico.";
-
 
   const input = `
 ====================================================
-PESQUISA ATUAL NA INTERNET
+DADOS ESTRUTURADOS DO FMI
+====================================================
+
+${dadosIMF}
+
+====================================================
+PESQUISA WEB
 ====================================================
 
 ${dadosWeb}
@@ -732,94 +745,114 @@ HISTÓRICO
 ${historico}
 
 ====================================================
-PERGUNTA
+PERGUNTA DO USUÁRIO
 ====================================================
 
 ${message}
 
 ====================================================
-INSTRUÇÕES PARA ESTA RESPOSTA
+INSTRUÇÕES
 ====================================================
 
-Responda diretamente à pergunta.
+Você precisa responder a pergunta do usuário.
 
-Você recebeu vários resultados de pesquisa.
+PRIORIDADE MÁXIMA:
 
-ANALISE TODOS ELES.
+1. Dados estruturados do FMI
+2. Fontes oficiais
+3. Outras fontes econômicas confiáveis
+4. Resultados gerais da pesquisa
 
-Procure especificamente por:
+Se o FMI fornecer um valor para 2026, utilize esse valor.
 
-- valores absolutos;
-- trilhões de dólares;
-- bilhões de dólares;
-- trilhões de ienes;
-- bilhões de ienes;
-- valores per capita;
-- porcentagens;
-- datas;
-- previsões;
-- estimativas;
-- dados oficiais.
+Se o FMI fornecer um valor em dólares, informe-o.
 
-NÃO responda somente com porcentagens.
+Se houver valor em moeda local, informe-o.
 
-Se o usuário perguntar sobre PIB, procure obrigatoriamente
-por um valor nominal.
+Se houver somente projeção, informe como PROJEÇÃO.
 
-Se houver um valor nominal projetado para 2026, informe-o.
+NÃO diga:
 
-Se houver valor em ienes e dólares, informe ambos.
+"o valor não foi encontrado"
 
-Se houver diferença entre fontes, explique.
+se houver um valor nos dados estruturados.
 
-Não invente nenhum número.
+NÃO diga:
 
-Se uma fonte fornecer um número confiável, utilize esse número.
+"não existe valor nominal"
 
-Se o dado de 2026 for projeção, escreva explicitamente:
+quando houver uma projeção nominal.
 
-"Projeção para 2026."
+NÃO substitua valores absolutos por porcentagens.
 
-Se for dado oficial:
+Exemplo de resposta desejada:
 
-"Dado oficial."
+🇯🇵 PIB nominal do Japão em 2026
 
-Se for estimativa:
+💰 Valor:
+US$ X trilhões
 
-"Estimativa."
+💴 Em ienes:
+¥ X trilhões
+
+📅 Ano:
+2026
+
+📌 Status:
+Projeção
+
+🏦 Fonte:
+FMI — World Economic Outlook
+
+📈 Crescimento real:
+X%
+
+Depois explique o significado.
+
+Se houver apenas uma das moedas disponível,
+informe a disponível e não invente a outra.
+
+====================================================
+
+Se a pergunta for:
+
+"Como está a economia do Japão?"
+
+faça um panorama completo.
+
+Inclua números de:
+
+PIB
+PIB per capita
+crescimento
+inflação
+juros
+iene
+desemprego
+salários
+consumo
+investimento
+exportações
+importações
+dívida
+produção industrial
+demografia
+
+e depois faça uma análise.
 
 ====================================================
 
 IMPORTANTE:
 
-O usuário quer respostas úteis e completas.
+Os dados estruturados do FMI são mais importantes que
+um resumo de uma página de pesquisa.
 
-Não diga simplesmente:
-
-"Não há um valor absoluto disponível."
-
-Antes disso, procure nos resultados por:
-
-- IMF
-- OECD
-- World Bank
-- Cabinet Office
-- Bank of Japan
-- Ministry of Finance
-- Statistics Bureau
-- outras fontes econômicas confiáveis.
-
-Se encontrar um valor projetado, informe o valor como projeção.
-
-====================================================
-
-Se a pergunta for ampla, faça uma análise ampla.
-
-Se for específica, seja específico.
+Não ignore os dados estruturados.
 
 Responda em português brasileiro.
-`;
 
+Não invente números.
+`;
 
   const response =
     await fetch(
@@ -834,18 +867,19 @@ Responda em português brasileiro.
 
         body: JSON.stringify({
           model: GEMINI_MODEL,
+
           system_instruction:
             gerarSystemPrompt(),
-          input: input,
+
+          input,
+
           store: false
         })
       }
     );
 
-
   const data =
     await response.json();
-
 
   if (!response.ok) {
 
@@ -858,8 +892,6 @@ Responda em português brasileiro.
 
   }
 
-
-  // Resposta direta
   if (
     typeof data.output_text === "string" &&
     data.output_text.trim()
@@ -869,8 +901,6 @@ Responda em português brasileiro.
 
   }
 
-
-  // Compatibilidade com steps
   let resposta = "";
 
   if (
@@ -908,7 +938,6 @@ Responda em português brasileiro.
 
   }
 
-
   if (!resposta.trim()) {
 
     throw new Error(
@@ -917,13 +946,12 @@ Responda em português brasileiro.
 
   }
 
-
   return resposta.trim();
 }
 
 
 // =====================================================
-// HANDLER VERCEL
+// HANDLER
 // =====================================================
 
 export default async function handler(
@@ -931,10 +959,7 @@ export default async function handler(
   res
 ) {
 
-  // ---------------------------------------------------
   // CORS
-  // ---------------------------------------------------
-
   res.setHeader(
     "Access-Control-Allow-Origin",
     "*"
@@ -951,37 +976,31 @@ export default async function handler(
   );
 
 
-  // ---------------------------------------------------
-  // TESTE DO SERVIDOR
-  // ---------------------------------------------------
-
+  // TESTE
   if (req.method === "GET") {
 
     return res.status(200).json({
       status: "online",
       agente:
         "Especialista em Economia do Japão",
-      modelo: GEMINI_MODEL
+      modelo: GEMINI_MODEL,
+      fontes: [
+        "IMF DataMapper",
+        "Serper",
+        "Gemini"
+      ]
     });
 
   }
 
 
-  // ---------------------------------------------------
   // OPTIONS
-  // ---------------------------------------------------
-
   if (req.method === "OPTIONS") {
-
     return res.status(204).end();
-
   }
 
 
-  // ---------------------------------------------------
   // POST
-  // ---------------------------------------------------
-
   if (req.method !== "POST") {
 
     return res.status(405).json({
@@ -991,10 +1010,6 @@ export default async function handler(
 
   }
 
-
-  // ---------------------------------------------------
-  // EXECUÇÃO
-  // ---------------------------------------------------
 
   try {
 
@@ -1023,9 +1038,9 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
-    // BUSCA
-    // -------------------------------------------------
+    // ================================================
+    // BUSCAR INTERNET
+    // ================================================
 
     const dadosWeb =
       await buscarDadosWeb(
@@ -1038,15 +1053,29 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
+    // ================================================
+    // BUSCAR FMI
+    // ================================================
+
+    const dadosIMF =
+      await buscarDadosIMF();
+
+
+    console.log(
+      "IMF: OK"
+    );
+
+
+    // ================================================
     // GEMINI
-    // -------------------------------------------------
+    // ================================================
 
     const reply =
       await gerarRespostaGemini(
         message,
         history,
-        dadosWeb
+        dadosWeb,
+        dadosIMF
       );
 
 
@@ -1055,12 +1084,8 @@ export default async function handler(
     );
 
 
-    // -------------------------------------------------
-    // RESPOSTA
-    // -------------------------------------------------
-
     return res.status(200).json({
-      reply: reply
+      reply
     });
 
 
@@ -1070,7 +1095,6 @@ export default async function handler(
       "ERRO NO BACKEND:",
       error
     );
-
 
     return res.status(500).json({
       error:
