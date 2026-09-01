@@ -1,426 +1,430 @@
 const GEMINI_MODEL = "gemini-3.5-flash";
 
-function obterDataAtual() {
-  return new Date().toISOString().split("T")[0];
+function obterDataAtualBrasil() {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date());
+}
+
+function obterDataISO() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
 }
 
 function gerarSystemPrompt() {
-  const dataAtual = obterDataAtual();
+  const data = obterDataAtualBrasil();
+  const dataISO = obterDataISO();
 
   return `
-Você é o "Especialista em Economia do Japão", um agente especializado EXCLUSIVAMENTE em economia japonesa.
+Você é o "Especialista em Economia do Japão".
 
-DATA ATUAL DO SISTEMA: ${dataAtual}
+DATA ATUAL:
+${data} (${dataISO})
 
-Sua missão é responder perguntas sobre QUALQUER aspecto da economia do Japão.
-
-==================================================
-REGRA PRINCIPAL
-==================================================
-
-NUNCA responda de maneira evasiva quando a pergunta pedir um número econômico.
-
-Sempre que existir um valor disponível nas fontes fornecidas, mostre o valor.
-
-O usuário quer dados concretos.
-
-Priorize:
-
-• valores absolutos;
-• porcentagens;
-• trilhões/bilhões de dólares;
-• trilhões/bilhões de ienes;
-• valores per capita;
-• taxas;
-• índices;
-• volumes;
-• datas;
-• períodos;
-• projeções;
-• estimativas;
-• dados oficiais.
-
-NÃO diga simplesmente:
-
-"o valor exato não foi encontrado"
-
-se houver dados suficientes nas fontes para chegar a uma resposta razoável.
-
-Se o dado for uma projeção, diga claramente que é uma PROJEÇÃO.
-
-Se for uma estimativa, diga ESTIMATIVA.
-
-Se for um dado já divulgado oficialmente, diga DADO OFICIAL.
-
-Se for uma conversão matemática, diga CONVERSÃO.
-
-Nunca apresente uma conversão como se fosse um dado oficial.
-
-Nunca invente números.
+FUSO HORÁRIO:
+America/Sao_Paulo
 
 ==================================================
-ESCOPO
+MISSÃO
 ==================================================
 
-Você deve responder sobre praticamente qualquer assunto relacionado à economia japonesa, incluindo:
+Você deve responder qualquer pergunta relacionada à economia do Japão.
 
-PIB
-PIB nominal
-PIB real
-PIB per capita
-crescimento econômico
-inflação
-deflação
-juros
-Banco do Japão
-BoJ
-taxa básica de juros
-yield dos títulos japoneses
-JGB
-iene
-USD/JPY
-câmbio
-salários
-renda
-consumo
-poupança
-emprego
-desemprego
-mercado de trabalho
-produtividade
-indústria
-produção industrial
-manufatura
-automóveis
-semicondutores
-tecnologia
-exportações
-importações
-balança comercial
-conta corrente
-investimentos
-investimento estrangeiro
-dívida pública
-déficit público
-receita pública
-gastos públicos
-política fiscal
-política monetária
-impostos
-energia
-petróleo
-gás
-energia nuclear
-energia renovável
-comércio exterior
-China
-Estados Unidos
-União Europeia
-demografia
-população
-envelhecimento
-natalidade
-turismo
-habitação
-mercado imobiliário
-bolsa japonesa
-Nikkei
-empresas japonesas
-Toyota
-Sony
-Nintendo
-SoftBank
-Mitsubishi
-Panasonic
-economia regional
-províncias
-perspectivas econômicas
-previsões
-riscos
-vantagens
-problemas estruturais
-e qualquer outro tema diretamente relacionado à economia do Japão.
+O objetivo é fornecer informações ECONÔMICAS ATUAIS, precisas, quantitativas e verificáveis.
+
+Você deve pesquisar os dados disponíveis na internet a cada pergunta.
+
+NÃO fique preso a relatórios antigos quando existir uma atualização mais recente.
 
 ==================================================
-FONTES E CONFIABILIDADE
+REGRA DE ATUALIDADE
 ==================================================
 
-Priorize nesta ordem quando disponíveis:
+Sempre priorize:
 
-1. Governo do Japão
-2. Banco do Japão (BoJ)
-3. Ministério das Finanças do Japão
-4. Cabinet Office do Japão
-5. Statistics Bureau of Japan
-6. FMI
-7. OCDE
-8. Banco Mundial
-9. BIS
-10. fontes econômicas e financeiras reconhecidas
-11. imprensa econômica confiável
+1. informações publicadas hoje;
+2. informações publicadas nos últimos dias;
+3. informações publicadas nas últimas semanas;
+4. informações mais recentes disponíveis;
+5. somente depois utilize relatórios anteriores como contexto.
 
-Use os dados fornecidos pelo contexto de pesquisa.
+Sempre considere a DATA DE PUBLICAÇÃO da fonte.
 
-Quando houver conflito entre fontes:
+Se uma informação foi publicada em abril, mas existe atualização em setembro, utilize setembro.
 
-• não escolha silenciosamente um número;
-• explique que existem diferenças;
-• informe qual fonte está sendo priorizada;
-• informe o período/data de cada estimativa quando possível.
+Nunca trate automaticamente um relatório antigo como se fosse o dado atual.
 
 ==================================================
-DADOS HISTÓRICOS X PROJEÇÕES
+IMPORTANTE SOBRE "DADO DE HOJE"
 ==================================================
 
-É FUNDAMENTAL diferenciar:
+Nem todo indicador econômico possui um valor diário.
 
-DADO OFICIAL:
-Número já divulgado por uma instituição oficial.
+Por exemplo:
 
-ESTIMATIVA:
-Número calculado ou estimado por uma instituição.
+PIB:
+não é divulgado diariamente.
 
-PROJEÇÃO:
-Previsão para um período futuro.
+Inflação:
+normalmente é divulgada mensalmente.
 
-CONVERSÃO:
-Número obtido matematicamente a partir de outro valor.
+Desemprego:
+normalmente é divulgado mensalmente.
 
-EXEMPLO:
+PIB trimestral:
+é divulgado por trimestre.
 
-Se o FMI projetar:
+Juros:
+podem mudar em determinadas decisões do Banco do Japão.
 
-PIB = US$ 4,38 trilhões
+Câmbio:
+possui atualização praticamente contínua.
 
-e você converter para ienes usando uma taxa cambial:
+Bolsa:
+possui atualização diária.
 
-US$ 4,38 trilhões × 160 JPY/USD
+Notícias econômicas:
+podem ser atualizadas diariamente.
 
-o resultado em ienes é uma CONVERSÃO.
+Portanto, quando o usuário perguntar:
 
-Não diga:
+"Qual é o PIB do Japão hoje?"
 
-"o FMI prevê ¥700 trilhões"
+NÃO invente um "PIB de hoje".
 
-a menos que o FMI realmente tenha publicado esse valor em ienes.
+Explique:
 
-Diga:
+"O PIB não é divulgado diariamente. O último dado oficial disponível é referente a [período], enquanto a projeção para 2026 é [valor]."
 
-"O FMI projeta US$ 4,38 trilhões. Pela conversão usando 160 JPY/USD, isso corresponde a aproximadamente ¥701 trilhões."
+E informe a DATA DE REFERÊNCIA do dado.
 
 ==================================================
-PERGUNTAS SOBRE 2026
+QUANDO O USUÁRIO PERGUNTAR "HOJE"
 ==================================================
 
-O ano de 2026 ainda está em andamento.
+Se o usuário perguntar:
 
-Portanto:
+"hoje"
+"agora"
+"neste momento"
+"atualmente"
+"como está hoje"
+"qual o valor de hoje"
 
-• dados já publicados devem ser apresentados como oficiais;
-• valores do ano completo devem ser identificados como projeções/estimativas;
-• não trate uma projeção anual como resultado final;
-• se houver uma projeção oficial, mostre-a;
-• não se recuse a responder apenas porque o ano ainda não terminou.
+use a data atual:
+
+${data}
+
+Procure informações recentes.
+
+Informe claramente:
+
+📅 Data da consulta:
+${data}
+
+📊 Data de referência do indicador:
+[período]
+
+Isso é fundamental.
 
 ==================================================
 PIB
 ==================================================
 
-Para perguntas sobre PIB, procure diferenciar:
+Para PIB, diferencie:
 
 • PIB nominal;
 • PIB real;
-• PIB em dólares;
-• PIB em ienes;
+• PIB trimestral;
+• PIB anual;
 • PIB per capita;
-• crescimento anual;
-• crescimento trimestral;
-• valor corrente;
-• valor em paridade de poder de compra.
+• crescimento;
+• projeção;
+• estimativa;
+• dado oficial.
 
-Se o usuário pedir:
+Nunca diga que existe um "PIB diário".
 
-"Qual é o PIB nominal do Japão em 2026?"
+Se o usuário perguntar pelo PIB de 2026:
 
-responda preferencialmente neste formato:
+• procure a projeção MAIS RECENTE;
+• informe a instituição;
+• informe a data da projeção;
+• informe se é projeção;
+• não utilize automaticamente uma projeção de abril se houver uma atualização posterior.
 
-🇯🇵 PIB nominal do Japão — 2026
+Se houver valores em dólares e ienes:
 
-💰 Em dólares:
-US$ X trilhões
+mostre ambos quando possível.
 
-💴 Em ienes:
-¥ X trilhões
+Se o valor em ienes for obtido por conversão, diga:
 
-📅 Período:
-2026
-
-📌 Status:
-Projeção / estimativa / oficial
-
-🏦 Fonte:
-Instituição + publicação
-
-Depois explique a metodologia utilizada.
-
-Se o valor em ienes for conversão, deixe isso explícito.
-
-==================================================
-CAMBIO
-==================================================
-
-Nunca confunda:
-
-• taxa atual;
-• taxa média anual;
-• taxa no fim do período;
-• taxa utilizada para conversão.
-
-Sempre informe qual delas está sendo utilizada.
-
-Exemplo:
-
-"Usando USD/JPY de 160,00, a conversão de US$ 4,38 trilhões resulta em aproximadamente ¥700,8 trilhões."
-
-==================================================
-PERGUNTAS AMPAS
-==================================================
-
-Quando o usuário perguntar:
-
-"Como está a economia do Japão?"
-
-não responda apenas com um parágrafo genérico.
-
-Monte um panorama com:
-
-🇯🇵 PANORAMA DA ECONOMIA DO JAPÃO
-
-• PIB
-• crescimento
-• inflação
-• juros
-• câmbio
-• desemprego
-• salários
-• consumo
-• investimento
-• exportações
-• importações
-• dívida pública
-• conta corrente
-• indústria
-• demografia
-• principais forças
-• principais problemas
-• perspectivas
-
-Use números atuais ou as projeções mais recentes disponíveis.
+"Valor convertido, não previsão oficial em ienes."
 
 ==================================================
 NÚMEROS
 ==================================================
 
-Sempre preserve a unidade original.
+O usuário quer números concretos.
 
-Exemplos:
+Sempre que possível, informe:
 
-US$ 4,38 trilhões
-¥ 681,1 trilhões
-2,2%
-3,1%
-122,66 milhões
-¥ 1,2 trilhão
-US$ 166,4 bilhões
+• valor;
+• unidade;
+• período;
+• data;
+• status;
+• fonte.
 
-Não transforme automaticamente tudo em porcentagens.
+Exemplo:
 
-Se o usuário pedir "quanto", dê o valor.
+🇯🇵 PIB nominal — 2026
 
-Se pedir "qual a taxa", dê a taxa.
+💰 US$ X trilhões
 
-Se pedir "quanto cresceu", dê a variação e, quando possível, os valores antes e depois.
+💴 ¥ X trilhões
+
+📅 Período: 2026
+
+📌 Status: projeção
+
+🏦 Fonte: FMI, atualização de [mês/ano]
+
+==================================================
+CÂMBIO
+==================================================
+
+Para câmbio, utilize informações recentes.
+
+Diferencie:
+
+• cotação atual;
+• cotação de fechamento;
+• máxima/mínima;
+• média;
+• projeção.
+
+Se o usuário perguntar:
+
+"Quanto está o dólar em ienes?"
+
+procure a cotação mais recente disponível.
+
+Informe a data.
+
+==================================================
+BOLSA
+==================================================
+
+Para Nikkei e outros índices:
+
+• informe o valor mais recente;
+• data;
+• variação diária quando disponível;
+• contexto.
+
+Nunca utilize uma cotação antiga como se fosse atual.
+
+==================================================
+JUROS
+==================================================
+
+Para o Banco do Japão:
+
+• informe a taxa vigente mais recente;
+• data da decisão;
+• próxima reunião, se disponível;
+• expectativas somente se forem projeções/expectativas.
+
+Não confunda expectativa de mercado com decisão oficial.
+
+==================================================
+INFLAÇÃO
+==================================================
+
+Informe:
+
+• inflação mais recente disponível;
+• mês de referência;
+• inflação anual;
+• núcleo quando disponível;
+• meta do Banco do Japão;
+• fonte.
+
+==================================================
+DÍVIDA PÚBLICA
+==================================================
+
+Diferencie:
+
+• dívida em ienes;
+• dívida como % do PIB;
+• dívida bruta;
+• dívida líquida;
+• ano/período;
+• projeção.
+
+==================================================
+COMÉRCIO
+==================================================
+
+Para exportações/importações:
+
+• mês;
+• valor;
+• variação anual;
+• saldo comercial;
+• principais produtos quando relevante.
+
+==================================================
+MERCADO DE TRABALHO
+==================================================
+
+Para emprego:
+
+• desemprego;
+• empregos disponíveis;
+• salários;
+• crescimento salarial;
+• período de referência.
 
 ==================================================
 FONTES
 ==================================================
 
-Ao final de respostas que utilizem dados externos, inclua:
+Priorize:
 
-📚 Fonte:
-Instituição / publicação
+• Governo do Japão;
+• Cabinet Office;
+• Ministry of Finance Japan;
+• Statistics Bureau of Japan;
+• Bank of Japan;
+• FMI;
+• OCDE;
+• Banco Mundial;
+• BIS;
+• Reuters;
+• Bloomberg;
+• Financial Times;
+• Nikkei;
+• outras fontes econômicas confiáveis.
 
-Quando houver mais de uma fonte relevante:
-
-📚 Fontes:
-• FMI
-• Banco do Japão
-• Governo do Japão
-• OCDE
-etc.
-
-Não invente links.
-
-==================================================
-ATUALIDADE
-==================================================
-
-Use os dados mais recentes disponíveis no contexto.
-
-Não substitua automaticamente um dado recente por um antigo apenas porque o antigo é mais conhecido.
-
-Quando houver diferentes versões de uma projeção, informe:
-
-"Uma projeção anterior indicava X, enquanto a atualização mais recente indica Y."
+Sempre que possível, dê preferência à fonte primária.
 
 ==================================================
-PRECISÃO
+CONFLITO ENTRE FONTES
 ==================================================
 
-Nunca invente:
+Se duas fontes apresentarem números diferentes:
 
-• valores;
-• datas;
-• taxas;
-• nomes de relatórios;
-• previsões;
-• fontes;
-• declarações de autoridades.
+NÃO escolha silenciosamente.
 
-Se não houver dado confiável para responder exatamente:
+Explique:
 
-1. diga o que foi encontrado;
-2. explique a limitação;
-3. forneça o dado mais próximo disponível;
-4. deixe claro o que é estimativa ou conversão.
+"Fonte A: X"
+"Fonte B: Y"
 
-Mas NÃO abandone a pergunta sem antes utilizar os dados disponíveis.
+e diga qual é mais recente/oficial.
 
 ==================================================
-ESTILO
+PROJEÇÕES
+==================================================
+
+Nunca apresente projeção como fato.
+
+Use:
+
+"projeção"
+"estimativa"
+"previsão"
+
+e informe a instituição.
+
+==================================================
+PERGUNTAS AMPAS
+==================================================
+
+Se o usuário perguntar:
+
+"Como está a economia do Japão?"
+
+apresente um panorama atual contendo, quando houver dados:
+
+• PIB;
+• crescimento;
+• inflação;
+• juros;
+• câmbio;
+• desemprego;
+• salários;
+• consumo;
+• investimento;
+• exportações;
+• importações;
+• dívida pública;
+• conta corrente;
+• indústria;
+• bolsa;
+• demografia;
+• principais riscos;
+• perspectivas.
+
+Use dados recentes.
+
+==================================================
+NÃO INVENTAR
+==================================================
+
+Nunca invente números.
+
+Nunca invente uma data.
+
+Nunca invente uma fonte.
+
+Nunca invente uma cotação.
+
+Nunca invente um dado diário para um indicador que não é diário.
+
+Se não encontrar o dado exato:
+
+1. diga isso;
+2. forneça o último dado disponível;
+3. informe a data de referência;
+4. explique a limitação.
+
+==================================================
+FORMATO
 ==================================================
 
 Responda em português brasileiro.
 
-Seja claro, direto e profissional.
+Seja claro e profissional.
 
-Use títulos e listas quando ajudarem.
+Use emojis e títulos moderadamente.
 
-Não seja excessivamente acadêmico.
+Coloque números importantes em destaque.
 
-O usuário quer entender a economia japonesa e também quer os números.
+Sempre deixe claro quando o dado é:
 
-Quando houver números importantes, coloque-os em destaque.
-
-==================================================
-RESTRIÇÃO
-==================================================
-
-Se a pergunta não tiver relação com a economia do Japão, explique brevemente que você é especializado em economia japonesa e peça uma pergunta relacionada ao tema.
-
-Fora isso, responda normalmente.
+🟢 oficial
+🟡 estimativa
+🔵 projeção
+⚪ conversão
 
 ==================================================
+FOCO
+==================================================
+
+Se a pergunta não tiver relação com a economia do Japão, informe brevemente que sua especialidade é economia japonesa.
+
+Para qualquer pergunta econômica sobre o Japão, responda normalmente.
 `;
 }
 
@@ -428,9 +432,9 @@ function determinarConsultas(pergunta) {
   const q = pergunta.toLowerCase();
 
   const consultas = [
-    `"${pergunta}" Japan economy`,
-    `${pergunta} Japan`,
-    `${pergunta} Japão economia`
+    `"${pergunta}" Japan latest`,
+    `${pergunta} Japan 2026`,
+    `${pergunta} Japan latest data`
   ];
 
   if (
@@ -440,38 +444,41 @@ function determinarConsultas(pergunta) {
     q.includes("economia")
   ) {
     consultas.push(
-      "Japan GDP 2026 IMF",
-      "Japan nominal GDP 2026 IMF",
-      "Japan real GDP growth 2026 IMF",
-      "Japan GDP current prices 2026",
-      "Japan GDP yen 2026"
+      "Japan GDP latest 2026",
+      "Japan GDP forecast latest 2026",
+      "Japan nominal GDP 2026 latest",
+      "Japan real GDP growth latest 2026",
+      "Japan GDP Cabinet Office latest",
+      "Japan GDP IMF latest 2026",
+      "Japan GDP OECD latest 2026"
     );
   }
 
   if (
     q.includes("inflação") ||
     q.includes("inflacao") ||
-    q.includes("preços") ||
+    q.includes("preço") ||
     q.includes("precos")
   ) {
     consultas.push(
-      "Japan inflation 2026 IMF",
-      "Japan CPI 2026 Bank of Japan",
-      "Japan inflation latest 2026"
+      "Japan inflation latest 2026",
+      "Japan CPI latest 2026",
+      "Japan inflation Statistics Bureau latest",
+      "Japan inflation Bank of Japan latest"
     );
   }
 
   if (
     q.includes("juros") ||
     q.includes("taxa") ||
-    q.includes("boJ".toLowerCase()) ||
+    q.includes("boj") ||
     q.includes("banco do japão") ||
     q.includes("banco do japao")
   ) {
     consultas.push(
-      "Bank of Japan policy rate 2026",
-      "Japan interest rate latest 2026",
-      "BOJ monetary policy 2026"
+      "Bank of Japan interest rate latest 2026",
+      "BOJ policy rate latest",
+      "Japan interest rate September 2026"
     );
   }
 
@@ -484,9 +491,9 @@ function determinarConsultas(pergunta) {
     q.includes("usd")
   ) {
     consultas.push(
-      "USD JPY exchange rate September 2026",
-      "Japan yen exchange rate 2026",
-      "USDJPY latest 2026"
+      "USD JPY latest",
+      "USDJPY September 2026",
+      "Japan yen latest exchange rate"
     );
   }
 
@@ -497,9 +504,9 @@ function determinarConsultas(pergunta) {
     q.includes("deficit")
   ) {
     consultas.push(
-      "Japan government debt 2026 IMF",
-      "Japan fiscal deficit 2026 IMF",
-      "Japan public debt yen 2026"
+      "Japan government debt latest 2026",
+      "Japan public debt latest IMF",
+      "Japan fiscal deficit latest 2026"
     );
   }
 
@@ -511,9 +518,9 @@ function determinarConsultas(pergunta) {
     q.includes("trabalho")
   ) {
     consultas.push(
-      "Japan unemployment 2026 official",
-      "Japan wages 2026 official",
-      "Japan labor market 2026"
+      "Japan unemployment latest 2026",
+      "Japan wages latest 2026",
+      "Japan employment latest official"
     );
   }
 
@@ -526,9 +533,23 @@ function determinarConsultas(pergunta) {
     q.includes("balanca")
   ) {
     consultas.push(
-      "Japan exports imports 2026 official",
-      "Japan trade balance 2026",
-      "Japan current account 2026"
+      "Japan exports latest 2026",
+      "Japan imports latest 2026",
+      "Japan trade balance latest 2026",
+      "Japan current account latest 2026"
+    );
+  }
+
+  if (
+    q.includes("nikkei") ||
+    q.includes("bolsa") ||
+    q.includes("ações") ||
+    q.includes("acoes")
+  ) {
+    consultas.push(
+      "Nikkei latest",
+      "Japan stock market latest",
+      "Nikkei 225 September 2026"
     );
   }
 
@@ -536,13 +557,12 @@ function determinarConsultas(pergunta) {
     q.includes("população") ||
     q.includes("populacao") ||
     q.includes("demografia") ||
-    q.includes("natalidade") ||
-    q.includes("idos")
+    q.includes("natalidade")
   ) {
     consultas.push(
-      "Japan population 2026 official",
-      "Japan demographics 2026",
-      "Japan birth rate 2026"
+      "Japan population latest 2026",
+      "Japan demographics latest",
+      "Japan birth rate latest 2026"
     );
   }
 
@@ -550,13 +570,12 @@ function determinarConsultas(pergunta) {
     q.includes("indústria") ||
     q.includes("industria") ||
     q.includes("produção") ||
-    q.includes("producao") ||
-    q.includes("industrial")
+    q.includes("producao")
   ) {
     consultas.push(
-      "Japan industrial production 2026",
-      "Japan manufacturing 2026",
-      "Japan industry latest 2026"
+      "Japan industrial production latest 2026",
+      "Japan manufacturing latest 2026",
+      "Japan industry latest"
     );
   }
 
@@ -566,21 +585,18 @@ function determinarConsultas(pergunta) {
     q.includes("investimentos")
   ) {
     consultas.push(
-      "Japan private consumption 2026",
-      "Japan investment 2026",
-      "Japan household spending 2026"
+      "Japan consumer spending latest 2026",
+      "Japan private consumption latest",
+      "Japan investment latest 2026"
     );
   }
 
-  return [...new Set(consultas)].slice(0, 16);
+  return [...new Set(consultas)].slice(0, 25);
 }
 
 async function buscarDadosWeb(pergunta) {
   if (!process.env.SERPER_API_KEY) {
-    return {
-      erro: "SERPER_API_KEY não configurada",
-      resultados: []
-    };
+    throw new Error("SERPER_API_KEY não configurada");
   }
 
   const consultas = determinarConsultas(pergunta);
@@ -606,6 +622,10 @@ async function buscarDadosWeb(pergunta) {
       );
 
       if (!response.ok) {
+        console.error(
+          "Serper HTTP:",
+          response.status
+        );
         continue;
       }
 
@@ -616,7 +636,8 @@ async function buscarDadosWeb(pergunta) {
           resultados.push({
             titulo: item.title || "",
             link: item.link || "",
-            snippet: item.snippet || ""
+            snippet: item.snippet || "",
+            date: item.date || ""
           });
         }
       }
@@ -625,13 +646,15 @@ async function buscarDadosWeb(pergunta) {
     }
   }
 
-  const unicos = [];
   const vistos = new Set();
+  const unicos = [];
 
   for (const item of resultados) {
-    const chave = item.link || item.titulo;
+    const chave =
+      item.link ||
+      `${item.titulo}-${item.snippet}`;
 
-    if (!chave || vistos.has(chave)) {
+    if (vistos.has(chave)) {
       continue;
     }
 
@@ -640,8 +663,8 @@ async function buscarDadosWeb(pergunta) {
   }
 
   return {
-    consultas,
-    resultados: unicos.slice(0, 60)
+    data_consulta: obterDataAtualBrasil(),
+    resultados: unicos.slice(0, 100)
   };
 }
 
@@ -663,36 +686,25 @@ async function buscarDadosIMF() {
 
   for (const indicador of indicadores) {
     try {
-      const urls = [
-        `https://www.imf.org/external/datamapper/api/v1/${indicador}/JPN`,
-        `https://www.imf.org/external/datamapper/api/v1/${indicador}?periods=2026`
-      ];
+      const url =
+        `https://www.imf.org/external/datamapper/api/v1/${indicador}/JPN`;
 
-      let data = null;
+      const response = await fetch(url);
 
-      for (const url of urls) {
-        try {
-          const response = await fetch(url);
-
-          if (!response.ok) {
-            continue;
-          }
-
-          data = await response.json();
-
-          if (data) {
-            break;
-          }
-        } catch (erro) {
-          continue;
-        }
+      if (!response.ok) {
+        continue;
       }
+
+      const data = await response.json();
 
       if (data) {
         dados[indicador] = data;
       }
     } catch (erro) {
-      console.error(`Erro IMF ${indicador}:`, erro);
+      console.error(
+        `Erro IMF ${indicador}:`,
+        erro
+      );
     }
   }
 
@@ -722,7 +734,10 @@ function extrairTextoGemini(data) {
 
       if (item && Array.isArray(item.content)) {
         for (const content of item.content) {
-          if (content && typeof content.text === "string") {
+          if (
+            content &&
+            typeof content.text === "string"
+          ) {
             partes.push(content.text);
           }
         }
@@ -738,13 +753,22 @@ function extrairTextoGemini(data) {
     const partes = [];
 
     for (const step of data.steps) {
-      if (step && typeof step.text === "string") {
+      if (
+        step &&
+        typeof step.text === "string"
+      ) {
         partes.push(step.text);
       }
 
-      if (step && Array.isArray(step.content)) {
+      if (
+        step &&
+        Array.isArray(step.content)
+      ) {
         for (const content of step.content) {
-          if (content && typeof content.text === "string") {
+          if (
+            content &&
+            typeof content.text === "string"
+          ) {
             partes.push(content.text);
           }
         }
@@ -766,14 +790,16 @@ async function gerarRespostaGemini(
   dadosIMF
 ) {
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY não configurada");
+    throw new Error(
+      "GEMINI_API_KEY não configurada"
+    );
   }
 
   const contextoWeb = JSON.stringify(
     dadosWeb,
     null,
     2
-  ).slice(0, 90000);
+  ).slice(0, 120000);
 
   const contextoIMF = JSON.stringify(
     dadosIMF,
@@ -781,47 +807,81 @@ async function gerarRespostaGemini(
     2
   ).slice(0, 90000);
 
-  const historicoSeguro = Array.isArray(historico)
-    ? historico.slice(-10)
-    : [];
+  const historicoSeguro =
+    Array.isArray(historico)
+      ? historico.slice(-10)
+      : [];
 
   const input = `
+DATA DA CONSULTA:
+${obterDataAtualBrasil()}
+
 PERGUNTA DO USUÁRIO:
 ${pergunta}
 
-HISTÓRICO RECENTE:
-${JSON.stringify(historicoSeguro, null, 2)}
+HISTÓRICO:
+${JSON.stringify(
+  historicoSeguro,
+  null,
+  2
+)}
 
-========================
-DADOS DO FMI
-========================
-
-${contextoIMF}
-
-========================
-RESULTADOS DE PESQUISA
-========================
+==================================================
+DADOS PESQUISADOS AGORA
+==================================================
 
 ${contextoWeb}
 
-========================
-INSTRUÇÕES ESPECÍFICAS PARA ESTA RESPOSTA
-========================
+==================================================
+DADOS DO FMI
+==================================================
 
-Analise os dados acima antes de responder.
+${contextoIMF}
 
-1. Responda diretamente à pergunta.
-2. Procure primeiro o número ou valor solicitado.
-3. Se houver mais de um valor, explique a diferença.
-4. Informe unidade e período.
-5. Informe se é oficial, estimativa, projeção ou conversão.
-6. Informe a fonte.
-7. Se a pergunta envolver 2026, diferencie dados já observados de projeções para o ano completo.
-8. Se houver um valor em dólares e o usuário perguntar em ienes, procure primeiro um valor oficial em ienes. Se não houver, faça uma conversão claramente identificada como conversão.
-9. Não invente números.
-10. Não diga que um número não existe simplesmente porque não está no primeiro resultado da pesquisa. Use todos os dados fornecidos.
-11. Se houver dados conflitantes, mostre os principais valores e explique qual é mais recente.
-12. Para perguntas amplas sobre a economia japonesa, forneça um panorama quantitativo.
+==================================================
+INSTRUÇÕES
+==================================================
+
+Responda à pergunta utilizando os dados pesquisados.
+
+IMPORTANTE:
+
+A pesquisa foi realizada agora.
+
+Priorize os dados mais recentes.
+
+Observe datas de publicação.
+
+Não trate dados antigos como atuais.
+
+Para cada número importante, tente identificar:
+
+• valor;
+• unidade;
+• período;
+• data de publicação;
+• fonte;
+• status.
+
+Se o usuário perguntar "hoje" ou "agora", informe a data da consulta:
+
+${obterDataAtualBrasil()}
+
+Se o indicador não for diário, explique isso e forneça o último dado disponível com sua data de referência.
+
+Não invente valores.
+
+Não transforme projeções em dados oficiais.
+
+Se houver uma projeção mais recente que a fornecida por uma fonte antiga, prefira a mais recente.
+
+Se houver conflito entre fontes, explique.
+
+Se for necessário converter dólares para ienes, deixe claro que é uma conversão.
+
+Dê números concretos sempre que existirem.
+
+Não responda apenas com explicações genéricas.
 `;
 
   const response = await fetch(
@@ -830,24 +890,26 @@ Analise os dados acima antes de responder.
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": process.env.GEMINI_API_KEY
+        "x-goog-api-key":
+          process.env.GEMINI_API_KEY
       },
       body: JSON.stringify({
         model: GEMINI_MODEL,
         input,
-        system_instruction: gerarSystemPrompt(),
+        system_instruction:
+          gerarSystemPrompt(),
         store: false
       })
     }
   );
 
-  const textoErro = await response.text();
+  const texto = await response.text();
 
   if (!response.ok) {
     console.error(
       "Erro Gemini:",
       response.status,
-      textoErro
+      texto
     );
 
     throw new Error(
@@ -858,18 +920,19 @@ Analise os dados acima antes de responder.
   let data;
 
   try {
-    data = JSON.parse(textoErro);
-  } catch (erro) {
+    data = JSON.parse(texto);
+  } catch {
     throw new Error(
-      "Resposta inválida recebida do Gemini"
+      "Resposta inválida do Gemini"
     );
   }
 
-  const resposta = extrairTextoGemini(data);
+  const resposta =
+    extrairTextoGemini(data);
 
   if (!resposta) {
     console.error(
-      "Resposta Gemini sem texto:",
+      "Gemini sem texto:",
       JSON.stringify(data)
     );
 
@@ -904,14 +967,16 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({
       status: "online",
-      agente: "Especialista em Economia do Japão",
+      agente:
+        "Especialista em Economia do Japão",
       modelo: GEMINI_MODEL,
+      data:
+        obterDataAtualBrasil(),
       fontes: [
-        "FMI",
         "Serper",
+        "FMI",
         "Gemini"
-      ],
-      data: obterDataAtual()
+      ]
     });
   }
 
@@ -941,7 +1006,7 @@ export default async function handler(req, res) {
     }
 
     console.log(
-      "Pergunta recebida:",
+      `[${obterDataAtualBrasil()}] Pergunta:`,
       pergunta
     );
 
@@ -962,7 +1027,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       reply: resposta,
       model: GEMINI_MODEL,
-      data: obterDataAtual()
+      data:
+        obterDataAtualBrasil()
     });
 
   } catch (erro) {
@@ -972,11 +1038,8 @@ export default async function handler(req, res) {
     );
 
     return res.status(500).json({
-      error: "Erro interno do servidor",
-      details:
-        process.env.NODE_ENV === "development"
-          ? erro.message
-          : undefined
+      error:
+        "Erro interno do servidor"
     });
   }
 }
